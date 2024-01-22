@@ -1,10 +1,11 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::{components::*, CameraState};
+use crate::{components::*, CameraState, FpsCounter};
 
 pub fn move_camera(
     inputs: Res<Input<KeyCode>>,
+    time: Res<Time>,
     mut camera: Query<(&mut Transform, &mut OrthographicProjection, &CameraMarker)>,
 ) {
     let (
@@ -13,20 +14,24 @@ pub fn move_camera(
         marker
     )   = camera.get_single_mut().unwrap();
 
+    let mut direction: Vec3 = Vec3::ZERO;
+
     if inputs.pressed(KeyCode::A) {
-        transform.translation.x -= marker.move_speed * marker.zoom_speed;
+        direction.x = -1.0;
     }
     else if inputs.pressed(KeyCode::D) {
-        transform.translation.x += marker.move_speed * marker.zoom_speed;
+        direction.x = 1.0;
     }
     
     if inputs.pressed(KeyCode::S) {
-        transform.translation.y -= marker.move_speed * marker.zoom_speed; 
+        direction.y = -1.0;
     }
     else if inputs.pressed(KeyCode::W) {
-        transform.translation.y += marker.move_speed * marker.zoom_speed;
+        direction.y = 1.0;
     }
-    
+    transform.translation += direction.normalize_or_zero() * marker.fc_move_speed * projection.scale * time.delta_seconds();
+
+
     if inputs.pressed(KeyCode::Q) {
         projection.scale /= marker.zoom_speed;
     }
@@ -62,17 +67,17 @@ pub fn move_player(
     player_transform.translation += direction.normalize_or_zero() * player_speed;
 }
 
-pub fn sync_player_camera(
+pub fn camera_follow_player(
     player: Query<&Transform, With<PlayerMarker>>,
-    mut camera: Query<&mut Transform, (With<Camera2d>, With<CameraMarker>, Without<PlayerMarker>)>,
+    mut camera: Query<(&mut Transform, &CameraMarker), (With<Camera2d>, Without<PlayerMarker>)>,
 ) {
     let Ok(player_transform) = player.get_single() else { return };
-    let Ok(mut camera_transform) = camera.get_single_mut() else { return };
+    let Ok((mut camera_transform, marker)) = camera.get_single_mut() else { return };
 
     let delta = player_transform.translation - camera_transform.translation;
 
     if delta.length() > 1.0 {
-       camera_transform.translation += 0.01 * delta;
+       camera_transform.translation += marker.fp_move_speed * delta;
     }
     else {
         camera_transform.translation = player_transform.translation;
@@ -112,7 +117,19 @@ pub fn reset_zoom(
 ) {
     let Ok(mut proj) = camera_query.get_single_mut() else { return };
 
-    if cam_state.is_changed() && *cam_state == CameraState::FollowPlayer {
-        proj.scale = 0.25;
+    if cam_state.is_changed() {
+        if *cam_state == CameraState::FollowPlayer {
+            proj.scale = 0.25;
+        }
+        else if *cam_state == CameraState::FreeCam {
+            proj.scale = 0.45;
+        }
     }
+}
+
+pub fn update_fps(
+    mut fps_counter: ResMut<FpsCounter>,
+    time: Res<Time>
+) {
+    fps_counter.fps = 1.0 / time.delta_seconds();
 }

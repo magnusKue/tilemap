@@ -2,6 +2,10 @@ use bevy::prelude::*;
 use bevy::core_pipeline::clear_color::ClearColorConfig;
 use bevy_ecs_ldtk::prelude::*;
 
+use bevy_inspector_egui::inspector_options::ReflectInspectorOptions;
+use bevy_inspector_egui::quick::{WorldInspectorPlugin, ResourceInspectorPlugin};
+use bevy_inspector_egui::InspectorOptions;
+
 pub mod systems;
 use crate::systems::*;
 
@@ -11,6 +15,12 @@ use crate::components::*;
 pub mod states;
 use crate::states::*;
 
+#[derive(Reflect, Resource, Default, InspectorOptions)]
+#[reflect(Resource, InspectorOptions)]
+pub struct FpsCounter {
+    fps: f32,
+}
+
 fn main() {
     App::new()
         .add_plugins(
@@ -18,16 +28,24 @@ fn main() {
         )
         .add_plugins(LdtkPlugin)
 
+        // Debug HUD
+        .init_resource::<FpsCounter>() // `ResourceInspectorPlugin` won't initialize the resource
+        .register_type::<FpsCounter>() // you need to register your type to display it
+        .add_plugins(ResourceInspectorPlugin::run_if(ResourceInspectorPlugin::<FpsCounter>::default(), in_state(CameraState::FreeCam)))
+        .add_plugins(WorldInspectorPlugin::run_if(WorldInspectorPlugin::new(), in_state(CameraState::FreeCam)))
+
+
         .add_state::<CameraState>()
 
         .add_systems(Startup, setup)
         .add_systems(Update, (
             move_camera.run_if(in_state(CameraState::FreeCam)),
             move_player.run_if(in_state(CameraState::FollowPlayer)),
-            sync_player_camera.run_if(in_state(CameraState::FollowPlayer)),
+            camera_follow_player.run_if(in_state(CameraState::FollowPlayer)),
             change_levels,
             switch_cam,
-            reset_zoom
+            reset_zoom,
+            update_fps
             ))
 
         .insert_resource(LevelSelection::Index(0))
@@ -35,6 +53,7 @@ fn main() {
         .register_ldtk_entity::<EnemyBundle>("MyEntityIdentifier")
         .register_ldtk_entity::<EnemyBundle>("TestEntity")
         .register_ldtk_entity::<PlayerBundle>("Player")
+
         .run();
 }
 
@@ -47,7 +66,8 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         CameraMarker {
             zoom_speed:1.02,
-            move_speed:8.0,
+            fc_move_speed:1000.0,
+            fp_move_speed:0.015,
             cam_offset: Vec3::ZERO,
         }
     ));
