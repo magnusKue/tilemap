@@ -1,14 +1,15 @@
 use bevy::prelude::*;
+use bevy::core_pipeline::clear_color::ClearColorConfig;
 use bevy_ecs_ldtk::prelude::*;
 
-#[derive(Component)]
-struct CameraMarker {
-    zoom_speed: f32,
-    move_speed: f32
-}
+pub mod systems;
+use crate::systems::*;
 
-#[derive(Default, Component)]
-struct Player;
+pub mod components;
+use crate::components::*;
+
+pub mod states;
+use crate::states::*;
 
 fn main() {
     App::new()
@@ -17,10 +18,16 @@ fn main() {
         )
         .add_plugins(LdtkPlugin)
 
+        .add_state::<CameraState>()
+
         .add_systems(Startup, setup)
         .add_systems(Update, (
-            move_camera,
-            change_levels
+            move_camera.run_if(in_state(CameraState::FreeCam)),
+            move_player.run_if(in_state(CameraState::FollowPlayer)),
+            sync_player_camera.run_if(in_state(CameraState::FollowPlayer)),
+            change_levels,
+            switch_cam,
+            reset_zoom
             ))
 
         .insert_resource(LevelSelection::Index(0))
@@ -33,77 +40,21 @@ fn main() {
 
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
-        Camera2dBundle{
-        transform: Transform::from_xyz(200.0, 0.0, 0.0),
-        ..Default::default()
+        Camera2dBundle {
+            transform: Transform::from_xyz(200.0, 0.0, 0.0),
+            camera_2d: Camera2d { clear_color: ClearColorConfig::Custom(Color::rgb(0.0, 0.0, 0.0))},
+            ..default()
         },
-        CameraMarker{
+        CameraMarker {
             zoom_speed:1.02,
-            move_speed:6.0
+            move_speed:8.0,
+            cam_offset: Vec3::ZERO,
         }
-    )
-    );
+    ));
 
     commands.spawn(LdtkWorldBundle {
         ldtk_handle: asset_server.load("my_project.ldtk"),
-        ..Default::default()
+        transform: Transform::from_xyz(0.0, 0.0, 0.0),
+        ..default()
     });
-}
-
-fn change_levels(
-    inputs: Res<Input<KeyCode>>,
-    mut commands: Commands
-) {
-    if inputs.just_pressed(KeyCode::R) {
-        commands.insert_resource(LevelSelection::Index(1));
-    }
-    else if inputs.just_pressed(KeyCode::T) {
-        commands.insert_resource(LevelSelection::Index(0));
-    }
-}
-
-fn move_camera(
-    inputs: Res<Input<KeyCode>>,
-    mut camera: Query<(&mut Transform, &mut OrthographicProjection, &CameraMarker)>,
-) {
-    let (
-        mut transform, 
-        mut projection, 
-        marker
-    )   = camera.get_single_mut().unwrap();
-
-    if inputs.pressed(KeyCode::A) {
-        transform.translation.x -= marker.move_speed * marker.zoom_speed;
-    }
-    else if inputs.pressed(KeyCode::D) {
-        transform.translation.x += marker.move_speed * marker.zoom_speed;
-    }
-    
-    if inputs.pressed(KeyCode::S) {
-        transform.translation.y -= marker.move_speed * marker.zoom_speed; 
-    }
-    else if inputs.pressed(KeyCode::W) {
-        transform.translation.y += marker.move_speed * marker.zoom_speed;
-    }
-    
-    if inputs.pressed(KeyCode::Q) {
-        projection.scale /= marker.zoom_speed;
-    }
-    else if inputs.pressed(KeyCode::E) {
-        projection.scale *= marker.zoom_speed;
-    }
-}
-
-
-#[derive(Default, Bundle, LdtkEntity)]
-pub struct EnemyBundle {
-    #[sprite_sheet_bundle]
-    sprite_bundle: SpriteSheetBundle,
-}
-
-#[derive(Default, Bundle, LdtkEntity)]
-pub struct PlayerBundle {
-    marker: Player,
-    #[sprite_sheet_bundle]
-    sprite_bundle: SpriteSheetBundle,
 }
