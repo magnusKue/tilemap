@@ -15,7 +15,10 @@ fn main() {
         .add_plugins(LdtkPlugin)
 
         .add_systems(Startup, setup)
-        .add_systems(Update, move_camera)
+        .add_systems(Update, (
+            move_camera,
+            change_levels
+            ))
 
         .insert_resource(LevelSelection::Index(0))
 
@@ -41,6 +44,15 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ldtk_handle: asset_server.load("my_project.ldtk"),
         ..Default::default()
     });
+}
+
+fn change_levels(
+    inputs: Res<Input<KeyCode>>,
+    mut commands: Commands
+) {
+    if inputs.just_pressed(KeyCode::R) {
+        commands.insert_resource(LevelSelection::Index(1));
+    }
 }
 
 fn move_camera(
