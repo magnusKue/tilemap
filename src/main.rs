@@ -16,7 +16,7 @@ pub mod camera;
 use crate::camera::*;
 
 pub mod physics;
-use crate::physics::*;
+// use crate::physics::*;
 
 
 
@@ -51,15 +51,16 @@ fn main() {
             change_levels,
             switch_cam,
             reset_zoom,
-            update_fps,
-            configure_player,
+            update_fps
         ))
 
-        .insert_resource(LevelSelection::Index(0))
+        .insert_resource(LevelSelection::Identifier("World_Level_0".to_string()))
+        .insert_resource(RapierConfiguration {
+            ..Default::default()
+        })
 
-        .register_ldtk_entity::<EnemyBundle>("MyEntityIdentifier")
-        .register_ldtk_entity::<EnemyBundle>("TestEntity")
         .register_ldtk_entity::<PlayerBundle>("Player")
+        .register_ldtk_entity::<EnemyBundle>("MyEntityIdentifier")
         
         
         .run();

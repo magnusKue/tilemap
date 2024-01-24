@@ -314,7 +314,7 @@
 					"entityInstances": [
 						{
 							"__identifier": "MyEntityIdentifier",
-							"__grid": [53,22],
+							"__grid": [8,20],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": { "tilesetUid": 5, "x": 128, "y": 576, "w": 32, "h": 32 },
@@ -323,10 +323,10 @@
 							"width": 64,
 							"height": 64,
 							"defUid": 4,
-							"px": [848,352],
+							"px": [128,320],
 							"fieldInstances": [{ "__identifier": "HP", "__type": "Int", "__value": 17, "__tile": null, "defUid": 9, "realEditorValues": [{ "id": "V_Int", "params": [17] }] }],
-							"__worldX": 848,
-							"__worldY": 352
+							"__worldX": 128,
+							"__worldY": 320
 						},
 						{
 							"__identifier": "MyEntityIdentifier",
@@ -360,8 +360,7 @@
 							"__worldX": 64,
 							"__worldY": 368
 						}
-					],
-					"intGrid": []
+					]
 				},
 				{
 					"__identifier": "Tiles",
@@ -2711,8 +2710,7 @@
 						{ "px": [1280,848], "src": [32,32], "f": 0, "t": 48, "d": [4426], "a": 1 },
 						{ "px": [1296,848], "src": [32,32], "f": 0, "t": 48, "d": [4427], "a": 1 }
 					],
-					"entityInstances": [],
-					"intGrid": []
+					"entityInstances": []
 				}
 			],
 			"__neighbours": [{ "levelIid": "653d8e10-b0a0-11ee-8cce-955b306c486a", "dir": "e" }]

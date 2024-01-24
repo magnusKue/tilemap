@@ -2,23 +2,40 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::PlayerMarker;
-
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Default, Component)]
-pub struct Wall;
-
 #[derive(Clone, Debug, Default, Bundle, LdtkIntCell)]
-pub struct WallBundle {
-    pub wall: Wall,
+pub struct PhysicsObjectBundle {
+    pub collider: Collider,
+    pub rigid_body: RigidBody,
+    pub velocity: Velocity,
+    pub rotation_constraints: LockedAxes,
+    pub gravity_scale: GravityScale,
+    pub friction: Friction,
+    pub density: ColliderMassProperties,
 }
 
-pub fn configure_player(
-    mut commands: Commands,
-    player_query: Query<(Entity, &PlayerMarker), Without<RigidBody>>, 
-) {
-    let Ok((player_entity, _)) = player_query.get_single() else { return; };
-    commands.entity(player_entity)
-        .insert(RigidBody::Dynamic)
-        .insert(Collider::ball(10.0))
-        .insert(TransformBundle::from(Transform::from_xyz(0.0, 400.0, 0.0)));
+impl From<&EntityInstance> for PhysicsObjectBundle {
+    fn from(entity_instance: &EntityInstance) -> PhysicsObjectBundle {
+        let rotation_constraints = LockedAxes::ROTATION_LOCKED;
+
+        match entity_instance.identifier.as_ref() {
+            "Player" => PhysicsObjectBundle {
+                collider: Collider::cuboid(6., 14.),
+                rigid_body: RigidBody::Fixed,
+                friction: Friction {
+                    coefficient: 0.0,
+                    combine_rule: CoefficientCombineRule::Min,
+                },
+                gravity_scale: GravityScale(0.0),
+                rotation_constraints,
+                ..Default::default()
+            },
+            "MyEntityIdentifier" => PhysicsObjectBundle {
+                collider: Collider::cuboid(5., 5.),
+                rigid_body: RigidBody::KinematicVelocityBased,
+                rotation_constraints,
+                ..Default::default()
+            },
+            _ => PhysicsObjectBundle::default(),
+        }
+    }
 }
