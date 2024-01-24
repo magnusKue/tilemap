@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::physics::PhysicsObjectBundle;
+use crate::physics::{ObjectPhysicsBundle, PlayerPhysicsBundle};
 // COMPONENTS
 
 #[derive(Default, Component)]
@@ -15,7 +15,7 @@ pub struct EnemyBundle {
     sprite_bundle: SpriteSheetBundle,
 
     #[from_entity_instance]
-    physics: PhysicsObjectBundle,
+    physics: ObjectPhysicsBundle,
 
     #[from_entity_instance]
     entity_instance: EntityInstance,
@@ -24,13 +24,9 @@ pub struct EnemyBundle {
 #[derive(Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     marker: PlayerMarker,
-    
+
     #[sprite_sheet_bundle]
     sprite_bundle: SpriteSheetBundle,
     
-    #[from_entity_instance]
-    physics: PhysicsObjectBundle,
-    
-    #[from_entity_instance]
-    entity_instance: EntityInstance,
+    physics: PlayerPhysicsBundle,
 }

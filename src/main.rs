@@ -21,25 +21,30 @@ pub mod physics;
 
 
 fn main() {
+    // App builder
     App::new()
-        .add_plugins(
-            DefaultPlugins.set(ImagePlugin::default_nearest()), // prevents blurry sprites
-        )
+        // PLUGINS
+        .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(LdtkPlugin)
+        // ------
 
         // EGUI
         .init_resource::<FpsCounter>() // `ResourceInspectorPlugin` won't initialize the resource
         .register_type::<FpsCounter>() // you need to register your type to display it
         .add_plugins(ResourceInspectorPlugin::run_if(ResourceInspectorPlugin::<FpsCounter>::default(), in_state(CameraState::FreeCam)))
         .add_plugins(WorldInspectorPlugin::run_if(WorldInspectorPlugin::new(), in_state(CameraState::FreeCam)))
+        // ------
 
         // RAPIER
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_plugins(RapierDebugRenderPlugin::default())
-        
-        //
-        .add_state::<CameraState>()
+        // ------
 
+        // STATES
+        .add_state::<CameraState>()
+        // ------
+
+        // Systems
         .add_systems(Update, bevy::window::close_on_esc)
         .add_systems(Startup, (
             setup,
@@ -53,15 +58,19 @@ fn main() {
             reset_zoom,
             update_fps
         ))
+        // ------
 
+        // Resources
         .insert_resource(LevelSelection::Identifier("World_Level_0".to_string()))
         .insert_resource(RapierConfiguration {
             ..Default::default()
         })
+        // ------
 
+        // LDtk entitys
         .register_ldtk_entity::<PlayerBundle>("Player")
         .register_ldtk_entity::<EnemyBundle>("MyEntityIdentifier")
-        
+        // ------
         
         .run();
 }
@@ -89,4 +98,8 @@ fn setup(
         transform: Transform::from_xyz(0.0, 0.0, 0.0),
         ..default()
     });
+    
+    commands.spawn(RigidBody::Fixed)
+        .insert(Collider::cuboid(20f32, 20f32))
+        .insert(Name::new("test_collider"));
 }

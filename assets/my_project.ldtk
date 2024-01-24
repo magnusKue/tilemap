@@ -314,7 +314,7 @@
 					"entityInstances": [
 						{
 							"__identifier": "MyEntityIdentifier",
-							"__grid": [8,20],
+							"__grid": [8,15],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": { "tilesetUid": 5, "x": 128, "y": 576, "w": 32, "h": 32 },
@@ -323,10 +323,10 @@
 							"width": 64,
 							"height": 64,
 							"defUid": 4,
-							"px": [128,320],
+							"px": [128,240],
 							"fieldInstances": [{ "__identifier": "HP", "__type": "Int", "__value": 17, "__tile": null, "defUid": 9, "realEditorValues": [{ "id": "V_Int", "params": [17] }] }],
 							"__worldX": 128,
-							"__worldY": 320
+							"__worldY": 240
 						},
 						{
 							"__identifier": "MyEntityIdentifier",
@@ -346,7 +346,7 @@
 						},
 						{
 							"__identifier": "Player",
-							"__grid": [4,23],
+							"__grid": [0,18],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": { "tilesetUid": 5, "x": 0, "y": 256, "w": 32, "h": 32 },
@@ -355,10 +355,10 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 10,
-							"px": [64,368],
+							"px": [0,288],
 							"fieldInstances": [],
-							"__worldX": 64,
-							"__worldY": 368
+							"__worldX": 0,
+							"__worldY": 288
 						}
 					]
 				},
