@@ -20,7 +20,7 @@ impl From<&EntityInstance> for PhysicsObjectBundle {
         match entity_instance.identifier.as_ref() {
             "Player" => PhysicsObjectBundle {
                 collider: Collider::cuboid(6., 14.),
-                rigid_body: RigidBody::Fixed,
+                rigid_body: RigidBody::KinematicPositionBased,
                 friction: Friction {
                     coefficient: 0.0,
                     combine_rule: CoefficientCombineRule::Min,
@@ -31,8 +31,9 @@ impl From<&EntityInstance> for PhysicsObjectBundle {
             },
             "MyEntityIdentifier" => PhysicsObjectBundle {
                 collider: Collider::cuboid(5., 5.),
-                rigid_body: RigidBody::KinematicVelocityBased,
+                rigid_body: RigidBody::Dynamic,
                 rotation_constraints,
+                gravity_scale: GravityScale(1.0),
                 ..Default::default()
             },
             _ => PhysicsObjectBundle::default(),

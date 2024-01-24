@@ -63,6 +63,7 @@ pub fn move_camera(
 }
 
 pub fn camera_follow_player(
+    time: Res<Time>,
     player: Query<&Transform, With<PlayerMarker>>,
     mut camera: Query<(&mut Transform, &CameraMarker), (With<Camera2d>, Without<PlayerMarker>)>,
 ) {
@@ -72,7 +73,7 @@ pub fn camera_follow_player(
     let delta = player_transform.translation - camera_transform.translation;
 
     if delta.length() > 1.0 {
-       camera_transform.translation += marker.fp_move_speed * delta;
+       camera_transform.translation += marker.fp_move_speed * delta * time.delta_seconds() * 100.0;
     }
     else {
         camera_transform.translation = player_transform.translation;

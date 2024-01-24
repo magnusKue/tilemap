@@ -66,7 +66,10 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup(
+    mut commands: Commands, 
+    asset_server: Res<AssetServer>
+) {
     commands.spawn((
         Camera2dBundle {
             transform: Transform::from_xyz(200.0, 0.0, 0.0),
@@ -76,7 +79,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         CameraMarker {
             zoom_speed:1.02,
             fc_move_speed:1000.0,
-            fp_move_speed:0.015,
+            fp_move_speed:0.018,
             cam_offset: Vec3::ZERO,
         }
     ));
