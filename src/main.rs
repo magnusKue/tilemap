@@ -32,6 +32,7 @@ fn main() {
         .init_resource::<FpsCounter>() // `ResourceInspectorPlugin` won't initialize the resource
         .register_type::<FpsCounter>() // you need to register your type to display it
         .add_plugins(ResourceInspectorPlugin::run_if(ResourceInspectorPlugin::<FpsCounter>::default(), in_state(CameraState::FreeCam)))
+        
         .add_plugins(WorldInspectorPlugin::run_if(WorldInspectorPlugin::new(), in_state(CameraState::FreeCam)))
         // ------
 

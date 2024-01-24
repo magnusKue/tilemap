@@ -62,7 +62,7 @@ pub fn move_camera(
     }
 }
 
-pub fn camera_follow_player(
+pub fn camera_follow_player (
     time: Res<Time>,
     player: Query<&Transform, With<PlayerMarker>>,
     mut camera: Query<(&mut Transform, &CameraMarker), (With<Camera2d>, Without<PlayerMarker>)>,
