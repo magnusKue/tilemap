@@ -4,15 +4,6 @@ use bevy_ecs_ldtk::prelude::*;
 // COMPONENTS
 
 #[derive(Default, Component)]
-pub struct CameraMarker {
-    pub zoom_speed: f32,
-    pub fc_move_speed: f32,
-    pub fp_move_speed: f32,
-    pub cam_offset: Vec3,
-}
-
-
-#[derive(Default, Component)]
 pub struct PlayerMarker { }
 
 // BUNDLES

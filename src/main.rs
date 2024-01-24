@@ -2,9 +2,9 @@ use bevy::prelude::*;
 use bevy::core_pipeline::clear_color::ClearColorConfig;
 use bevy_ecs_ldtk::prelude::*;
 
-use bevy_inspector_egui::inspector_options::ReflectInspectorOptions;
 use bevy_inspector_egui::quick::{WorldInspectorPlugin, ResourceInspectorPlugin};
-use bevy_inspector_egui::InspectorOptions;
+
+use bevy_rapier2d::prelude::*;
 
 pub mod systems;
 use crate::systems::*;
@@ -12,14 +12,13 @@ use crate::systems::*;
 pub mod components;
 use crate::components::*;
 
-pub mod states;
-use crate::states::*;
+pub mod camera;
+use crate::camera::*;
 
-#[derive(Reflect, Resource, Default, InspectorOptions)]
-#[reflect(Resource, InspectorOptions)]
-pub struct FpsCounter {
-    fps: f32,
-}
+pub mod physics;
+use crate::physics::*;
+
+
 
 fn main() {
     App::new()
@@ -28,16 +27,23 @@ fn main() {
         )
         .add_plugins(LdtkPlugin)
 
-        // Debug HUD
+        // EGUI
         .init_resource::<FpsCounter>() // `ResourceInspectorPlugin` won't initialize the resource
         .register_type::<FpsCounter>() // you need to register your type to display it
         .add_plugins(ResourceInspectorPlugin::run_if(ResourceInspectorPlugin::<FpsCounter>::default(), in_state(CameraState::FreeCam)))
         .add_plugins(WorldInspectorPlugin::run_if(WorldInspectorPlugin::new(), in_state(CameraState::FreeCam)))
 
-
+        // RAPIER
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        .add_plugins(RapierDebugRenderPlugin::default())
+        
+        //
         .add_state::<CameraState>()
 
-        .add_systems(Startup, setup)
+        .add_systems(Update, bevy::window::close_on_esc)
+        .add_systems(Startup, (
+            setup,
+        ))
         .add_systems(Update, (
             move_camera.run_if(in_state(CameraState::FreeCam)),
             move_player.run_if(in_state(CameraState::FollowPlayer)),
@@ -45,15 +51,17 @@ fn main() {
             change_levels,
             switch_cam,
             reset_zoom,
-            update_fps
-            ))
+            update_fps,
+            configure_player,
+        ))
 
         .insert_resource(LevelSelection::Index(0))
 
         .register_ldtk_entity::<EnemyBundle>("MyEntityIdentifier")
         .register_ldtk_entity::<EnemyBundle>("TestEntity")
         .register_ldtk_entity::<PlayerBundle>("Player")
-
+        
+        
         .run();
 }
 
