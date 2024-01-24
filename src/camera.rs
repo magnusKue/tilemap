@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_inspector_egui::inspector_options::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
+use bevy_rapier2d::render::DebugRenderContext;
+
 
 use crate::PlayerMarker;
 
@@ -25,6 +27,10 @@ pub struct CameraMarker {
     pub cam_offset: Vec3,
 }
 
+
+
+// SYSTEMS
+
 pub fn move_camera(
     inputs: Res<Input<KeyCode>>,
     time: Res<Time>,
@@ -39,25 +45,25 @@ pub fn move_camera(
     let mut direction: Vec3 = Vec3::ZERO;
 
     if inputs.pressed(KeyCode::A) {
-        direction.x = -1.0;
+        direction.x = -1f32;
     }
     else if inputs.pressed(KeyCode::D) {
-        direction.x = 1.0;
+        direction.x = 1f32;
     }
     
     if inputs.pressed(KeyCode::S) {
-        direction.y = -1.0;
+        direction.y = -1f32;
     }
     else if inputs.pressed(KeyCode::W) {
-        direction.y = 1.0;
+        direction.y = 1f32;
     }
     transform.translation += direction.normalize_or_zero() * marker.fc_move_speed * projection.scale * time.delta_seconds();
 
 
-    if inputs.pressed(KeyCode::Q) {
+    if inputs.pressed(KeyCode::E) {
         projection.scale /= marker.zoom_speed;
     }
-    else if inputs.pressed(KeyCode::E) {
+    else if inputs.pressed(KeyCode::Q) {
         projection.scale *= marker.zoom_speed;
     }
 }
@@ -99,14 +105,17 @@ pub fn reset_zoom(
 pub fn switch_cam(
     keyboard: Res<Input<KeyCode>>,
     cam_state: ResMut<State<CameraState>>,
-    mut commands: Commands 
+    mut commands: Commands,
+    mut physics_debugger: ResMut<DebugRenderContext>
 ) {
     if keyboard.just_pressed(KeyCode::Space){
         if *cam_state == CameraState::FreeCam {
-            commands.insert_resource(NextState(Some(CameraState::FollowPlayer)))
+            commands.insert_resource(NextState(Some(CameraState::FollowPlayer)));
+            physics_debugger.enabled = false;
         }
         else if *cam_state == CameraState::FollowPlayer {
-            commands.insert_resource(NextState(Some(CameraState::FreeCam)))
+            commands.insert_resource(NextState(Some(CameraState::FreeCam)));
+            physics_debugger.enabled = true;
         }
     }
 }

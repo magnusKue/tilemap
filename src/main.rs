@@ -1,10 +1,13 @@
 use bevy::prelude::*;
 use bevy::core_pipeline::clear_color::ClearColorConfig;
+
 use bevy_ecs_ldtk::prelude::*;
 
 use bevy_inspector_egui::quick::{WorldInspectorPlugin, ResourceInspectorPlugin};
 
 use bevy_rapier2d::prelude::*;
+
+// MODULES
 
 pub mod systems;
 use crate::systems::*;
@@ -17,6 +20,9 @@ use crate::camera::*;
 
 pub mod physics;
 // use crate::physics::*;
+
+pub mod player;
+use crate::player::*;
 
 
 
@@ -38,7 +44,7 @@ fn main() {
 
         // RAPIER
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins(RapierDebugRenderPlugin{enabled:true, ..default()})
         // ------
 
         // STATES
@@ -101,6 +107,6 @@ fn setup(
     });
     
     commands.spawn(RigidBody::Fixed)
-        .insert(Collider::cuboid(20f32, 20f32))
+        .insert(Collider::cuboid(2000f32, 20f32))
         .insert(Name::new("test_collider"));
 }
