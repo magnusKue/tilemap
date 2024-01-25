@@ -57,13 +57,16 @@ fn main() {
             setup,
         ))
         .add_systems(Update, (
-            move_camera.run_if(in_state(CameraState::FreeCam)),
-            move_player.run_if(in_state(CameraState::FollowPlayer)),
-            camera_follow_player.run_if(in_state(CameraState::FollowPlayer)),
-            change_levels,
-            switch_cam,
-            reset_zoom,
-            update_fps
+            player::move_player.run_if(in_state(CameraState::FollowPlayer)),
+            
+            systems::change_levels,
+            
+            camera::move_camera.run_if(in_state(CameraState::FreeCam)),
+            camera::camera_follow_player.run_if(in_state(CameraState::FollowPlayer)),
+            camera::switch_cam,
+            camera::reset_zoom,
+            camera::update_fps,
+
         ))
         // ------
 
@@ -104,7 +107,7 @@ fn setup(
         ldtk_handle: asset_server.load("my_project.ldtk"),
         transform: Transform::from_xyz(0.0, 0.0, 0.0),
         ..default()
-    });
+    }).insert(Name::new("TileMap".to_string()));
     
     commands.spawn(RigidBody::Fixed)
         .insert(Collider::cuboid(2000f32, 20f32))
