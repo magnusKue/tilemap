@@ -7,7 +7,6 @@ use bevy_rapier2d::prelude::*;
 pub struct PlayerPhysicsBundle {
     pub collider: Collider,
     pub controller: KinematicCharacterController,
-    pub rb: RigidBody,
     pub gravity_scale: GravityScale,
     pub rot_constraints: LockedAxes,
 }
@@ -15,9 +14,8 @@ pub struct PlayerPhysicsBundle {
 impl Default for PlayerPhysicsBundle {
     fn default() -> PlayerPhysicsBundle {
         PlayerPhysicsBundle {
-            collider: Collider::cuboid(16.0, 16.0),
+            collider: Collider::cuboid(15.0, 15.0),
             controller: KinematicCharacterController::default(),
-            rb: RigidBody::Dynamic,
             gravity_scale: GravityScale(2f32),
             rot_constraints: LockedAxes::ROTATION_LOCKED,
         }
@@ -53,3 +51,17 @@ impl From<&EntityInstance> for ObjectPhysicsBundle {
         }
     }
 }
+
+
+
+pub fn build_wall_colliders (
+    mut commands: Commands,
+    tiles: Query<(Entity, &TileEnumTags), Added<TileEnumTags>>,
+) {
+    for (entity, enum_tags) in tiles.iter() {
+        println!("contains enum");
+        if enum_tags.tags.contains(&String::from("Wall")) {
+            commands.entity(entity).insert(Collider::cuboid(8.0, 8.0));
+        }
+    }
+}   

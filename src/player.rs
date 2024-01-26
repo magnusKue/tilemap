@@ -7,6 +7,11 @@ use crate::CameraMarker;
 #[derive(Default, Component)]
 pub struct PlayerMarker { }
 
+#[derive(Default, Component)]
+pub struct PlayerPhysicsValues { 
+    pub velocity: Vec2,
+}
+
 #[derive(Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     marker: PlayerMarker,
@@ -15,6 +20,7 @@ pub struct PlayerBundle {
     sprite_bundle: SpriteSheetBundle,
     
     physics: PlayerPhysicsBundle,
+    physics_values: PlayerPhysicsValues
 }
 
 

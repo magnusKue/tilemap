@@ -10,7 +10,7 @@ use bevy_rapier2d::prelude::*;
 // MODULES
 
 pub mod systems;
-use crate::systems::*;
+// use crate::systems::*;
 
 pub mod components;
 use crate::components::*;
@@ -57,10 +57,12 @@ fn main() {
             setup,
         ))
         .add_systems(Update, (
+            physics::build_wall_colliders,
             player::move_player.run_if(in_state(CameraState::FollowPlayer)),
             
             systems::change_levels,
             
+
             camera::move_camera.run_if(in_state(CameraState::FreeCam)),
             camera::camera_follow_player.run_if(in_state(CameraState::FollowPlayer)),
             camera::switch_cam,
