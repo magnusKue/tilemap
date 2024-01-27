@@ -33,7 +33,10 @@ impl Default for PlayerPhysicsBundle {
     fn default() -> PlayerPhysicsBundle {
         PlayerPhysicsBundle {
             collider: Collider::cuboid(15.0, 15.0),
-            controller: KinematicCharacterController::default(),
+            controller: KinematicCharacterController {
+                snap_to_ground: Some(CharacterLength::Relative(1.0)),
+                ..default()
+            },
             gravity_scale: GravityScale(0f32),
             rot_constraints: LockedAxes::ROTATION_LOCKED,
         }

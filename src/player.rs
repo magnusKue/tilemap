@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use bevy_rapier2d::control::KinematicCharacterController;
+use bevy_inspector_egui::inspector_options::ReflectInspectorOptions;
+use bevy_inspector_egui::InspectorOptions;
+use bevy_rapier2d::control::{KinematicCharacterController, KinematicCharacterControllerOutput};
 use crate::physics::PlayerPhysicsBundle;
 use crate::CameraMarker;
 use crate::CameraState;
@@ -10,10 +12,41 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
+            .add_systems(Startup, add_controller_output.before(move_player))
             .add_systems(Update, (move_player.run_if(in_state(CameraState::FollowPlayer)),))
-            .register_ldtk_entity::<PlayerBundle>("Player");
+            .register_ldtk_entity::<PlayerBundle>("Player")
+            
+            .init_resource::<PlayerPhysicsConstants>()
+            .register_type::<PlayerPhysicsConstants>();
     }
 }
+
+//
+
+#[derive(Reflect, Resource, InspectorOptions)]
+#[reflect(Resource, InspectorOptions)]
+pub struct PlayerPhysicsConstants {
+    player_speed: f32,
+    player_max_speed: f32,
+    jump_boost: f32,
+    friction: Vec2,
+    acceleration: f32,
+    gravity: f32,
+}
+
+impl Default for PlayerPhysicsConstants {
+    fn default() -> Self {
+        PlayerPhysicsConstants {
+            player_speed: 0.1f32,
+            player_max_speed: 4f32,
+            jump_boost: 250f32,
+            friction: Vec2::new(0.1f32, 0f32),
+            acceleration: 1.2f32,
+            gravity: 4f32,
+        }
+    }
+}
+
 
 #[derive(Default, Component)]
 pub struct PlayerMarker { }
@@ -44,51 +77,74 @@ pub struct PlayerBundle {
 
 // SYSTEMS
 
+pub fn add_controller_output(
+    mut player_controller_query: Query<&mut KinematicCharacterController>,
+) {
+    let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
+    player_controller.translation = Some(Vec2::ZERO);
+}
+
 pub fn move_player(
     inputs: Res<Input<KeyCode>>,
     time: Res<Time>,
+    phys_consts: Res<PlayerPhysicsConstants>,
     mut player_query: Query<(&Transform, &mut PlayerPhysicsValues), With<PlayerMarker>>,
     mut player_controller_query: Query<&mut KinematicCharacterController>,
+    player_controller_output_query: Query<&KinematicCharacterControllerOutput>,
     camera_query: Query<(&mut Transform, &CameraMarker), Without<PlayerMarker>>,
 ) {
-    let Ok((player_transform, mut player_physics_values)) = player_query.get_single_mut() else { return };
+    let Ok((_player_transform, mut player_physics_values)) = player_query.get_single_mut() else { return };
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
-
-    let Ok((camera_transform, _)) = camera_query.get_single() else { return };
     
-    if (camera_transform.translation - player_transform.translation).length() > 50f32 { return };
-
-    let player_speed: Vec2 = Vec2 { x: 0.1f32, y: 1f32 };
-    let jump_boost: f32 = 25f32;
-
-    let friction = Vec2::new(0.2f32, 0.2f32);
-    let acceleration = 1.2f32;
-    let gravity = 0.4f32;
+    let Ok((_camera_transform, _)) = camera_query.get_single() else { return };
     
-    player_physics_values.velocity *= Vec2::new(1f32, 1f32) - friction;
-    player_physics_values.velocity.y -= gravity;
+    // if (camera_transform.translation - player_transform.translation).length() > 50f32 { return };    
 
-    let mut direction: Vec2 = Vec2::ZERO;
+    // println!("{}", player_physics_values.velocity);
+    
 
+    // X-COMPONENT:
+
+    if player_physics_values.velocity.x.abs() < 0.0001 { player_physics_values.velocity.x = 0f32 }
+    player_physics_values.velocity.x *= 1.0 - phys_consts.friction.x;
+
+    let mut direction: f32 = 0.0;
+    
     if inputs.pressed(KeyCode::A) {
-        direction.x = -1f32;
+        direction = -1.0;
     }
     else if inputs.pressed(KeyCode::D) {
-        direction.x = 1f32;
+        direction = 1.0;
     }
     
-    if inputs.pressed(KeyCode::S) {
-        direction.y = -1f32;
-    }
-    else if inputs.pressed(KeyCode::W) {
-        direction.y = 1f32;
+    player_physics_values.velocity.x += direction * phys_consts.acceleration * phys_consts.player_speed* 100f32;
+
+
+    // Y-COMPONENT
+
+    if player_physics_values.velocity.y.abs() < 0.001 { player_physics_values.velocity.y = 0f32 }
+
+    player_physics_values.velocity.y -= phys_consts.gravity;
+
+    if let Ok(player_controller_output) = player_controller_output_query.get_single() {
+        if player_controller_output.grounded {
+            
+            println!("grounded");
+            player_physics_values.velocity.y = 0.0;
+            
+            if inputs.just_pressed(KeyCode::Space) {
+                player_physics_values.velocity.y = phys_consts.jump_boost;
+                println!("jumped");
+            }
+            
+        }
     }
 
-    if inputs.just_pressed(KeyCode::Space) {
-        player_physics_values.velocity.y += jump_boost;
-    }
+    // SET TRANSLATION
 
-    player_physics_values.velocity += direction.normalize_or_zero() * acceleration;
+    player_controller.translation = Some(player_physics_values.velocity  * time.delta_seconds());
+    
 
-    player_controller.translation = Some(player_physics_values.velocity * player_speed * time.delta_seconds() * 100f32);
+    // (OPTIONAL) Handle Jumping
+
 }
