@@ -18,7 +18,7 @@ impl Plugin for PlayerPlugin {
             .add_systems(Startup, add_controller_output.before(move_player))
             .add_systems(Update, (
                 move_player.run_if(in_state(CameraState::FollowPlayer)),
-                tick_coyote_timer
+                tick_timers
             ))
             .register_ldtk_entity::<PlayerBundle>("Player")
             

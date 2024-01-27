@@ -40,10 +40,10 @@ pub fn build_wall_colliders (
             commands.entity(entity).insert(Collider::cuboid(8.0, 8.0));
         }
         else if enum_tags.tags.contains(&String::from("FullSlope")) {
-            commands.entity(entity).insert(Collider::triangle(Vec2::new(-8.0, -8.0), Vec2::new(8.0, -8.0), Vec2::new(8.0, 8.0)));
+            commands.entity(entity).insert(Collider::triangle(Vec2::new(-8.0, -8.5), Vec2::new(8.0, -8.5), Vec2::new(8.0, 8.0)));
         }
         else if enum_tags.tags.contains(&String::from("FullSlopeInv")) {
-            commands.entity(entity).insert(Collider::triangle(Vec2::new(-8.0, -8.0), Vec2::new(8.0, -8.0), Vec2::new(-8.0, 8.0)));
+            commands.entity(entity).insert(Collider::triangle(Vec2::new(-8.0, -8.5), Vec2::new(8.0, -8.5), Vec2::new(-8.0, 8.0)));
         }
         // else if enum_tags.tags.contains(&String::from("Circle")) {
         //     commands.entity(entity).insert(Collider::cuboid(8.0, 300.0));

@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -17,11 +18,11 @@ pub fn move_player(
     inputs: Res<Input<KeyCode>>,
     time: Res<Time>,
     phys_consts: Res<PlayerPhysicsConstants>,
-    mut player_query: Query<(&Transform, &mut PlayerPhysicsValues, &mut CoyoteWatch), With<PlayerMarker>>,
+    mut player_query: Query<(&Transform, &mut PlayerPhysicsValues, &mut CoyoteWatch, &mut JumpBuffer), With<PlayerMarker>>,
     mut player_controller_query: Query<&mut KinematicCharacterController>,
     player_controller_output_query: Query<&KinematicCharacterControllerOutput>,
 ) {
-    let Ok((_, mut player_phys_vals, mut coy_timer)) = player_query.get_single_mut() else { return };
+    let Ok((_, mut player_phys_vals, mut coy_timer, mut jump_buffer)) = player_query.get_single_mut() else { return };
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
     // DEBUG
@@ -74,7 +75,7 @@ pub fn move_player(
                 player_phys_vals.velocity.y = -0.2;
             }
 
-            if inputs.just_pressed(KeyCode::Space){ 
+            if inputs.just_pressed(KeyCode::Space) || jump_buffer.timer.elapsed_secs() < phys_consts.jump_inp_buffering { 
                 player_phys_vals.velocity.y = phys_consts.jump_boost;
                 coy_timer.timer.tick(Duration::from_secs_f32(200.0f32));
             }
@@ -115,11 +116,19 @@ pub fn move_player(
 
 }
 
-pub fn tick_coyote_timer(
-    mut player_query: Query<&mut CoyoteWatch, With<PlayerMarker>>,
+pub fn tick_timers(
+    mut player_query: Query<(&mut CoyoteWatch, &mut JumpBuffer), With<PlayerMarker>>,
     time: Res<Time>,
+    inputs: Res<Input<KeyCode>>,
 ) {
-    for mut player_timer in player_query.iter_mut() {
-        player_timer.timer.tick(time.delta());
+    for (mut coyote_timer, mut jump_buffer_timer) in player_query.iter_mut() {
+        coyote_timer.timer.tick(time.delta());
+        jump_buffer_timer.timer.tick(time.delta());
+        println!("{}", jump_buffer_timer.timer.elapsed_secs());
+        
+        if inputs.just_pressed(KeyCode::Space) {
+            jump_buffer_timer.timer.reset();
+        }
     }
+
 }

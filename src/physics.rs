@@ -35,7 +35,7 @@ impl Default for PlayerPhysicsBundle {
             collider: Collider::cuboid(14.0, 14.0),
             controller: KinematicCharacterController {
                 snap_to_ground: Some(CharacterLength::Relative(0.1)),
-                max_slope_climb_angle: 0.8, // ~47° in radians
+                max_slope_climb_angle: 0.9, // ~47° in radians
                 offset: CharacterLength::Absolute(0.1),
                 autostep: Some(CharacterAutostep {
                     max_height: CharacterLength::Absolute(2.0),
@@ -60,7 +60,7 @@ pub struct ObjectPhysicsBundle {
     pub rotation_constraints: LockedAxes,
     pub gravity_scale: GravityScale,
     pub friction: Friction,
-    pub density: ColliderMassProperties,
+    pub density: ColliderMassProperties, 
 }
 
 

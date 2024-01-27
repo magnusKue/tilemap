@@ -34,6 +34,18 @@ impl Default for CoyoteWatch {
     }
 }
 
+/// Input buffer for Jumping input
+#[derive(Component)]
+pub struct JumpBuffer {
+    pub timer: Stopwatch,
+}
+
+impl Default for JumpBuffer {
+    fn default() -> JumpBuffer {
+        JumpBuffer { timer: Stopwatch::new() }
+    }
+}
+
 #[derive(Default, Bundle, LdtkEntity)]
 pub struct PlayerBundle {
     marker: PlayerMarker,
@@ -44,4 +56,5 @@ pub struct PlayerBundle {
     physics: PlayerPhysicsBundle,
     physics_values: PlayerPhysicsValues,
     coyote_watch: CoyoteWatch,
+    jump_buffer: JumpBuffer,
 }
