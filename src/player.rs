@@ -128,18 +128,29 @@ pub fn move_player(
 
     if let Ok(player_controller_output) = player_controller_output_query.get_single() {
         if player_controller_output.grounded {
-            
-            println!("grounded");
+            // println!("grounded");
             player_physics_values.velocity.y = 0.0;
             
             if inputs.just_pressed(KeyCode::Space) {
                 player_physics_values.velocity.y = phys_consts.jump_boost;
-                println!("jumped");
+                // println!("jumped");
             }
             
         }
+        
+        // RESET Y WHEN BUMPING INTO CEILING
+        for collision in player_controller_output.collisions.iter() {
+            // If the y component of the collision normal is facing downwards then weve collided with an object above us            
+            if collision.toi.normal1.y == -1f32 {
+                // println!("hit ceiling");
+                player_physics_values.velocity.y = 0.0;
+            }
+        }    
+        
     }
-
+    else {
+        println!("no controller output!");
+    }
     // SET TRANSLATION
 
     player_controller.translation = Some(player_physics_values.velocity  * time.delta_seconds());
