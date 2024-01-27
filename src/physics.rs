@@ -2,6 +2,24 @@ use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+// PLUGIN
+
+pub struct PhysicsPlugin;
+
+impl Plugin for PhysicsPlugin {
+    fn build(&self, app: &mut App) {
+        app
+            // RAPIER
+            .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+            .add_plugins(RapierDebugRenderPlugin{enabled:true, ..default()})
+            // ------
+
+            // Resources
+            .insert_resource(RapierConfiguration::default());
+            // ------
+    }
+}
+
 
 #[derive(Debug, Bundle)]
 pub struct PlayerPhysicsBundle {
@@ -16,7 +34,7 @@ impl Default for PlayerPhysicsBundle {
         PlayerPhysicsBundle {
             collider: Collider::cuboid(15.0, 15.0),
             controller: KinematicCharacterController::default(),
-            gravity_scale: GravityScale(2f32),
+            gravity_scale: GravityScale(0f32),
             rot_constraints: LockedAxes::ROTATION_LOCKED,
         }
     }
@@ -51,17 +69,3 @@ impl From<&EntityInstance> for ObjectPhysicsBundle {
         }
     }
 }
-
-
-
-pub fn build_wall_colliders (
-    mut commands: Commands,
-    tiles: Query<(Entity, &TileEnumTags), Added<TileEnumTags>>,
-) {
-    for (entity, enum_tags) in tiles.iter() {
-        println!("contains enum");
-        if enum_tags.tags.contains(&String::from("Wall")) {
-            commands.entity(entity).insert(Collider::cuboid(8.0, 8.0));
-        }
-    }
-}   

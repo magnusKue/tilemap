@@ -391,7 +391,7 @@
 					"entityInstances": [
 						{
 							"__identifier": "MyEntityIdentifier",
-							"__grid": [8,15],
+							"__grid": [9,31],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": { "tilesetUid": 5, "x": 128, "y": 576, "w": 32, "h": 32 },
@@ -400,10 +400,10 @@
 							"width": 64,
 							"height": 64,
 							"defUid": 4,
-							"px": [128,240],
+							"px": [144,496],
 							"fieldInstances": [{ "__identifier": "HP", "__type": "Int", "__value": 17, "__tile": null, "defUid": 9, "realEditorValues": [{ "id": "V_Int", "params": [17] }] }],
-							"__worldX": 128,
-							"__worldY": 240
+							"__worldX": 144,
+							"__worldY": 496
 						},
 						{
 							"__identifier": "MyEntityIdentifier",

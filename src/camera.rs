@@ -1,8 +1,46 @@
+use bevy::core_pipeline::clear_color::ClearColorConfig;
 use bevy::prelude::*;
 use bevy_inspector_egui::inspector_options::ReflectInspectorOptions;
+use bevy_inspector_egui::quick::{ResourceInspectorPlugin, WorldInspectorPlugin};
 use bevy_inspector_egui::InspectorOptions;
 use bevy_rapier2d::render::DebugRenderContext;
 
+// PLUGIN
+
+pub struct CameraPlugin;
+
+impl Plugin for CameraPlugin {
+    fn build(&self, app: &mut App) {
+        app
+        // EGUI
+        .add_plugins(ResourceInspectorPlugin::run_if(ResourceInspectorPlugin::<FpsCounter>::default(), in_state(CameraState::FreeCam)))
+        
+        .add_plugins(WorldInspectorPlugin::run_if(WorldInspectorPlugin::new(), in_state(CameraState::FreeCam)))
+        
+        .init_resource::<FpsCounter>() // `ResourceInspectorPlugin` won't initialize the resource
+        .register_type::<FpsCounter>() // you need to register your type to display it 
+        // ------
+
+        // STATES
+        .add_state::<CameraState>()
+        // ------
+
+        // SYSTEMS
+        .add_systems(Startup, (
+                setup_camera,
+            ))
+            .add_systems(Update, (
+                move_camera.run_if(in_state(CameraState::FreeCam)),
+                camera_follow_player.run_if(in_state(CameraState::FollowPlayer)),
+                switch_cam,
+                reset_zoom,
+                update_fps,
+            ));
+        // -------
+    }
+}
+
+//
 
 use crate::PlayerMarker;
 
@@ -30,6 +68,24 @@ pub struct CameraMarker {
 
 
 // SYSTEMS
+
+pub fn setup_camera(
+    mut commands: Commands,
+) {
+    commands.spawn((
+        Camera2dBundle {
+            transform: Transform::from_xyz(200.0, 0.0, 0.0),
+            camera_2d: Camera2d { clear_color: ClearColorConfig::Custom(Color::rgb(0.0, 0.0, 0.0))},
+            ..default()
+        },
+        CameraMarker {
+            zoom_speed:1.02,
+            fc_move_speed:1000.0,
+            fp_move_speed:0.018,
+            cam_offset: Vec3::ZERO,
+        }
+    ));
+}
 
 pub fn move_camera(
     inputs: Res<Input<KeyCode>>,
@@ -78,7 +134,7 @@ pub fn camera_follow_player (
 
     let delta = player_transform.translation - camera_transform.translation;
 
-    if delta.length() > 1.0 {
+    if delta.length() > 2.0 {
        camera_transform.translation += marker.fp_move_speed * delta * time.delta_seconds() * 100.0;
     }
     else {
@@ -108,7 +164,7 @@ pub fn switch_cam(
     mut commands: Commands,
     mut physics_debugger: ResMut<DebugRenderContext>
 ) {
-    if keyboard.just_pressed(KeyCode::Space){
+    if keyboard.just_pressed(KeyCode::Tab){
         if *cam_state == CameraState::FreeCam {
             commands.insert_resource(NextState(Some(CameraState::FollowPlayer)));
             physics_debugger.enabled = false;
