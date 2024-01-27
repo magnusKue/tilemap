@@ -25,9 +25,8 @@ pub fn move_player(
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
     // DEBUG
-    // println!("{}", player_physics_values.velocity);
-
-    println!("{}", coy_timer.timer.elapsed().as_secs_f32());
+    // println!("{}", coy_timer.timer.elapsed().as_secs_f32());
+    
     // X-COMPONENT:
 
     if player_physics_values.velocity.x.abs() < 0.0001 { player_physics_values.velocity.x = 0f32 }
@@ -42,7 +41,22 @@ pub fn move_player(
         direction = 1.0;
     }
     
+    if let Ok(player_controller_output) = player_controller_output_query.get_single() {
+        for collision in player_controller_output.collisions.iter() {
+            if collision.toi.normal1.y == 0.0  {
+                // println!("hit ceiling");
+                player_physics_values.velocity.x = 0.0; //collision.toi.normal1.x * 70.0;
+                direction = 0.0;
+                // println!("hit wall");
+            }
+        }    
+    }
+
     player_physics_values.velocity.x += direction * phys_consts.acceleration * phys_consts.player_speed* 100f32;
+
+
+
+
 
 
     // Y-COMPONENT
@@ -71,7 +85,7 @@ pub fn move_player(
             coy_timer.timer.reset();
         }
         
-        // RESET Y WHEN BUMPING INTO CEILING
+        // RESET VELOCITY WHEN BUMPING INTO SOMETHING
         for collision in player_controller_output.collisions.iter() {
             // If the y component of the collision normal is facing downwards then weve collided with an object above us            
             if collision.toi.normal1.y == -1f32 {

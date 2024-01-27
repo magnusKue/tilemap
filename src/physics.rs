@@ -32,9 +32,13 @@ pub struct PlayerPhysicsBundle {
 impl Default for PlayerPhysicsBundle {
     fn default() -> PlayerPhysicsBundle {
         PlayerPhysicsBundle {
-            collider: Collider::cuboid(15.0, 15.0),
+            collider: Collider::cuboid(14.0, 14.0),
             controller: KinematicCharacterController {
-                snap_to_ground: Some(CharacterLength::Relative(1.0)),
+                snap_to_ground: Some(CharacterLength::Relative(0.1)),
+                max_slope_climb_angle: 0.8, // ~47° in radians
+                offset: CharacterLength::Absolute(0.01),
+                autostep: Option::None,
+                up: Vec2::new(0.0, 1.0),
                 ..default()
             },
             gravity_scale: GravityScale(0f32),

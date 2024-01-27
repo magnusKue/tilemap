@@ -51,15 +51,8 @@ fn main() {
 }
 
 fn setup(
-    mut commands: Commands, 
-    asset_server: Res<AssetServer>
+    mut commands: Commands,
 ) {
-    commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("my_project.ldtk"),
-        transform: Transform::from_xyz(0.0, 0.0, 0.0),
-        ..default()
-    }).insert(Name::new("TileMap".to_string()));
-    
     commands.spawn(RigidBody::Fixed)
         .insert(Collider::cuboid(2000f32, 20f32))
         .insert(Name::new("test_collider"));
