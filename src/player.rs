@@ -4,7 +4,6 @@ use bevy_inspector_egui::inspector_options::ReflectInspectorOptions;
 use bevy_inspector_egui::InspectorOptions;
 use bevy_rapier2d::control::{KinematicCharacterController, KinematicCharacterControllerOutput};
 use crate::physics::PlayerPhysicsBundle;
-use crate::CameraMarker;
 use crate::CameraState;
 
 pub struct PlayerPlugin;
@@ -91,17 +90,12 @@ pub fn move_player(
     mut player_query: Query<(&Transform, &mut PlayerPhysicsValues), With<PlayerMarker>>,
     mut player_controller_query: Query<&mut KinematicCharacterController>,
     player_controller_output_query: Query<&KinematicCharacterControllerOutput>,
-    camera_query: Query<(&mut Transform, &CameraMarker), Without<PlayerMarker>>,
 ) {
-    let Ok((_player_transform, mut player_physics_values)) = player_query.get_single_mut() else { return };
+    let Ok((_, mut player_physics_values)) = player_query.get_single_mut() else { return };
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
-    let Ok((_camera_transform, _)) = camera_query.get_single() else { return };
-    
-    // if (camera_transform.translation - player_transform.translation).length() > 50f32 { return };    
-
+    // DEBUG
     // println!("{}", player_physics_values.velocity);
-    
 
     // X-COMPONENT:
 
@@ -122,22 +116,24 @@ pub fn move_player(
 
     // Y-COMPONENT
 
-    if player_physics_values.velocity.y.abs() < 0.001 { player_physics_values.velocity.y = 0f32 }
+    // if player_physics_values.velocity.y.abs() < 0.001 { player_physics_values.velocity.y = 0f32 }
 
     player_physics_values.velocity.y -= phys_consts.gravity;
 
     if let Ok(player_controller_output) = player_controller_output_query.get_single() {
-        if player_controller_output.grounded {
-            // println!("grounded");
-            player_physics_values.velocity.y = 0.0;
-            
-            if inputs.just_pressed(KeyCode::Space) {
-                player_physics_values.velocity.y = phys_consts.jump_boost;
-                // println!("jumped");
-            }
-            
-        }
         
+        if player_controller_output.grounded {
+
+            // println!("grounded");
+            player_physics_values.velocity.y = -0.2;
+
+            if inputs.just_pressed(KeyCode::Space){ 
+                print!("jumped");
+                player_physics_values.velocity.y = phys_consts.jump_boost;
+                
+            }
+        }
+
         // RESET Y WHEN BUMPING INTO CEILING
         for collision in player_controller_output.collisions.iter() {
             // If the y component of the collision normal is facing downwards then weve collided with an object above us            
@@ -152,7 +148,7 @@ pub fn move_player(
         println!("no controller output!");
     }
     // SET TRANSLATION
-
+    
     player_controller.translation = Some(player_physics_values.velocity  * time.delta_seconds());
     
 
