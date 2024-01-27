@@ -1,7 +1,10 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::player::*;
+use crate::player::components::CoyoteWatch;
 
 pub fn add_controller_output(
     mut player_controller_query: Query<&mut KinematicCharacterController>,
@@ -14,16 +17,17 @@ pub fn move_player(
     inputs: Res<Input<KeyCode>>,
     time: Res<Time>,
     phys_consts: Res<PlayerPhysicsConstants>,
-    mut player_query: Query<(&Transform, &mut PlayerPhysicsValues), With<PlayerMarker>>,
+    mut player_query: Query<(&Transform, &mut PlayerPhysicsValues, &mut CoyoteWatch), With<PlayerMarker>>,
     mut player_controller_query: Query<&mut KinematicCharacterController>,
     player_controller_output_query: Query<&KinematicCharacterControllerOutput>,
 ) {
-    let Ok((_, mut player_physics_values)) = player_query.get_single_mut() else { return };
+    let Ok((_, mut player_physics_values, mut coy_timer)) = player_query.get_single_mut() else { return };
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
     // DEBUG
     // println!("{}", player_physics_values.velocity);
 
+    println!("{}", coy_timer.timer.elapsed().as_secs_f32());
     // X-COMPONENT:
 
     if player_physics_values.velocity.x.abs() < 0.0001 { player_physics_values.velocity.x = 0f32 }
@@ -49,17 +53,24 @@ pub fn move_player(
 
     if let Ok(player_controller_output) = player_controller_output_query.get_single() {
         
-        if player_controller_output.grounded {
+        if player_controller_output.grounded || coy_timer.timer.elapsed_secs() < phys_consts.coyote_time{
 
             // println!("grounded");
-            player_physics_values.velocity.y = -0.2;
+            if player_controller_output.grounded {
+                player_physics_values.velocity.y = -0.2;
+            }
 
             if inputs.just_pressed(KeyCode::Space){ 
                 player_physics_values.velocity.y = phys_consts.jump_boost;
-                
+                coy_timer.timer.tick(Duration::from_secs_f32(200.0f32));
             }
         }
-
+        
+        // RESET COYOTE TIMER WHEN leaving grounded state
+        if player_physics_values.last_frame_grounded != player_controller_output.grounded && !player_controller_output.grounded {
+            coy_timer.timer.reset();
+        }
+        
         // RESET Y WHEN BUMPING INTO CEILING
         for collision in player_controller_output.collisions.iter() {
             // If the y component of the collision normal is facing downwards then weve collided with an object above us            
@@ -69,13 +80,28 @@ pub fn move_player(
             }
         }    
         
+
+        player_physics_values.last_frame_grounded = player_controller_output.grounded;
     }
+
+    // MAKE FALLING FASTER THEN RISING 
+    let mut applied_velocity = player_physics_values.velocity;
+    if applied_velocity.y < 0.0 { applied_velocity.y *= phys_consts.falling_gravity_scaler };
 
     // SET TRANSLATION
     
-    player_controller.translation = Some(player_physics_values.velocity  * time.delta_seconds());
+    player_controller.translation = Some(applied_velocity  * time.delta_seconds());
     
 
     // (OPTIONAL) Handle Jumping
 
+}
+
+pub fn tick_coyote_timer(
+    mut player_query: Query<&mut CoyoteWatch, With<PlayerMarker>>,
+    time: Res<Time>,
+) {
+    for mut player_timer in player_query.iter_mut() {
+        player_timer.timer.tick(time.delta());
+    }
 }

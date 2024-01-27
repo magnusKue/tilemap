@@ -16,7 +16,10 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app
             .add_systems(Startup, add_controller_output.before(move_player))
-            .add_systems(Update, (move_player.run_if(in_state(CameraState::FollowPlayer)),))
+            .add_systems(Update, (
+                move_player.run_if(in_state(CameraState::FollowPlayer)),
+                tick_coyote_timer
+            ))
             .register_ldtk_entity::<PlayerBundle>("Player")
             
             .init_resource::<PlayerPhysicsConstants>()
