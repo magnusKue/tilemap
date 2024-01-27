@@ -21,7 +21,7 @@ pub fn move_player(
     mut player_controller_query: Query<&mut KinematicCharacterController>,
     player_controller_output_query: Query<&KinematicCharacterControllerOutput>,
 ) {
-    let Ok((_, mut player_physics_values, mut coy_timer)) = player_query.get_single_mut() else { return };
+    let Ok((_, mut player_phys_vals, mut coy_timer)) = player_query.get_single_mut() else { return };
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
     // DEBUG
@@ -29,8 +29,8 @@ pub fn move_player(
     
     // X-COMPONENT:
 
-    if player_physics_values.velocity.x.abs() < 0.0001 { player_physics_values.velocity.x = 0f32 }
-    player_physics_values.velocity.x *= 1.0 - phys_consts.friction.x;
+    if player_phys_vals.velocity.x.abs() < 0.0001 { player_phys_vals.velocity.x = 0f32 }
+    player_phys_vals.velocity.x *= 1.0 - phys_consts.friction.x;
 
     let mut direction: f32 = 0.0;
     
@@ -45,14 +45,14 @@ pub fn move_player(
         for collision in player_controller_output.collisions.iter() {
             if collision.toi.normal1.y == 0.0  {
                 // println!("hit ceiling");
-                player_physics_values.velocity.x = 0.0; //collision.toi.normal1.x * 70.0;
+                player_phys_vals.velocity.x = 0.0; //collision.toi.normal1.x * 70.0;
                 direction = 0.0;
                 // println!("hit wall");
             }
         }    
     }
 
-    player_physics_values.velocity.x += direction * phys_consts.acceleration * phys_consts.player_speed* 100f32;
+    player_phys_vals.velocity.x += direction * phys_consts.acceleration * phys_consts.player_speed* 100f32;
 
 
 
@@ -63,7 +63,7 @@ pub fn move_player(
 
     // if player_physics_values.velocity.y.abs() < 0.001 { player_physics_values.velocity.y = 0f32 }
 
-    player_physics_values.velocity.y -= phys_consts.gravity;
+    player_phys_vals.velocity.y -= phys_consts.gravity;
 
     if let Ok(player_controller_output) = player_controller_output_query.get_single() {
         
@@ -71,17 +71,17 @@ pub fn move_player(
 
             // println!("grounded");
             if player_controller_output.grounded {
-                player_physics_values.velocity.y = -0.2;
+                player_phys_vals.velocity.y = -0.2;
             }
 
             if inputs.just_pressed(KeyCode::Space){ 
-                player_physics_values.velocity.y = phys_consts.jump_boost;
+                player_phys_vals.velocity.y = phys_consts.jump_boost;
                 coy_timer.timer.tick(Duration::from_secs_f32(200.0f32));
             }
         }
         
         // RESET COYOTE TIMER WHEN leaving grounded state
-        if player_physics_values.last_frame_grounded != player_controller_output.grounded && !player_controller_output.grounded {
+        if player_phys_vals.last_frame_grounded != player_controller_output.grounded && !player_controller_output.grounded {
             coy_timer.timer.reset();
         }
         
@@ -90,16 +90,20 @@ pub fn move_player(
             // If the y component of the collision normal is facing downwards then weve collided with an object above us            
             if collision.toi.normal1.y == -1f32 {
                 // println!("hit ceiling");
-                player_physics_values.velocity.y = 0.0;
+                player_phys_vals.velocity.y = 0.0;
             }
         }    
         
 
-        player_physics_values.last_frame_grounded = player_controller_output.grounded;
+        player_phys_vals.last_frame_grounded = player_controller_output.grounded;
+    }
+
+    if inputs.just_released(KeyCode::Space) && player_phys_vals.velocity.y > 0f32{
+        player_phys_vals.velocity.y *= 0.5;
     }
 
     // MAKE FALLING FASTER THEN RISING 
-    let mut applied_velocity = player_physics_values.velocity;
+    let mut applied_velocity = player_phys_vals.velocity;
     if applied_velocity.y < 0.0 { applied_velocity.y *= phys_consts.falling_gravity_scaler };
 
     // SET TRANSLATION
