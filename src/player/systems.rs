@@ -1,80 +1,7 @@
 use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
-use bevy_inspector_egui::inspector_options::ReflectInspectorOptions;
-use bevy_inspector_egui::InspectorOptions;
-use bevy_rapier2d::control::{KinematicCharacterController, KinematicCharacterControllerOutput};
-use crate::physics::PlayerPhysicsBundle;
-use crate::CameraState;
+use bevy_rapier2d::prelude::*;
 
-pub struct PlayerPlugin;
-
-impl Plugin for PlayerPlugin {
-    fn build(&self, app: &mut App) {
-        app
-            .add_systems(Startup, add_controller_output.before(move_player))
-            .add_systems(Update, (move_player.run_if(in_state(CameraState::FollowPlayer)),))
-            .register_ldtk_entity::<PlayerBundle>("Player")
-            
-            .init_resource::<PlayerPhysicsConstants>()
-            .register_type::<PlayerPhysicsConstants>();
-    }
-}
-
-//
-
-#[derive(Reflect, Resource, InspectorOptions)]
-#[reflect(Resource, InspectorOptions)]
-pub struct PlayerPhysicsConstants {
-    player_speed: f32,
-    player_max_speed: f32,
-    jump_boost: f32,
-    friction: Vec2,
-    acceleration: f32,
-    gravity: f32,
-}
-
-impl Default for PlayerPhysicsConstants {
-    fn default() -> Self {
-        PlayerPhysicsConstants {
-            player_speed: 0.1f32,
-            player_max_speed: 4f32,
-            jump_boost: 250f32,
-            friction: Vec2::new(0.1f32, 0f32),
-            acceleration: 1.2f32,
-            gravity: 4f32,
-        }
-    }
-}
-
-
-#[derive(Default, Component)]
-pub struct PlayerMarker { }
-
-#[derive(Component)]
-pub struct PlayerPhysicsValues { 
-    pub velocity: Vec2,
-}
-
-impl Default for PlayerPhysicsValues {
-    fn default() -> PlayerPhysicsValues {
-        PlayerPhysicsValues { velocity: Vec2::ZERO }
-    }
-}
-
-
-#[derive(Default, Bundle, LdtkEntity)]
-pub struct PlayerBundle {
-    marker: PlayerMarker,
-
-    #[sprite_sheet_bundle]
-    sprite_bundle: SpriteSheetBundle,
-    
-    physics: PlayerPhysicsBundle,
-    physics_values: PlayerPhysicsValues
-}
-
-
-// SYSTEMS
+use crate::player::*;
 
 pub fn add_controller_output(
     mut player_controller_query: Query<&mut KinematicCharacterController>,
@@ -128,7 +55,6 @@ pub fn move_player(
             player_physics_values.velocity.y = -0.2;
 
             if inputs.just_pressed(KeyCode::Space){ 
-                print!("jumped");
                 player_physics_values.velocity.y = phys_consts.jump_boost;
                 
             }
@@ -144,9 +70,7 @@ pub fn move_player(
         }    
         
     }
-    else {
-        println!("no controller output!");
-    }
+
     // SET TRANSLATION
     
     player_controller.translation = Some(player_physics_values.velocity  * time.delta_seconds());

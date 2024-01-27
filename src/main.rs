@@ -13,13 +13,12 @@ pub mod components;
 use crate::components::*;
 
 pub mod camera;
-use crate::camera::*;
 
 pub mod physics;
 // use crate::physics::*;
 
 pub mod player;
-use crate::player::*;
+// use crate::player::*;
 
 pub mod level;
 

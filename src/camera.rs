@@ -5,7 +5,7 @@ use bevy_inspector_egui::quick::{ResourceInspectorPlugin, WorldInspectorPlugin};
 use bevy_inspector_egui::InspectorOptions;
 use bevy_rapier2d::render::DebugRenderContext;
 
-// PLUGIN
+use crate::player::components::PlayerMarker;
 
 pub struct CameraPlugin;
 
@@ -42,7 +42,6 @@ impl Plugin for CameraPlugin {
 
 //
 
-use crate::PlayerMarker;
 
 #[derive(States, Default, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum CameraState {
