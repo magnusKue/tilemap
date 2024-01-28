@@ -1,8 +1,6 @@
 use bevy::prelude::*;
-
-use bevy_ecs_ldtk::prelude::*;
-
 use bevy_rapier2d::prelude::*;
+use bevy_ecs_ldtk::prelude::*;
 
 // MODULES
 
@@ -54,6 +52,6 @@ fn setup(
     mut commands: Commands,
 ) {
     commands.spawn(RigidBody::Fixed)
-        .insert(Collider::cuboid(2000f32, 20f32))
+        .insert(Collider::cuboid(20000f32, 20f32))
         .insert(Name::new("test_collider"));
 }

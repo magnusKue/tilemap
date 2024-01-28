@@ -11,7 +11,7 @@ impl Plugin for PhysicsPlugin {
         app
             // RAPIER
             .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-            .add_plugins(RapierDebugRenderPlugin{enabled:true, ..default()})
+            .add_plugins(RapierDebugRenderPlugin{enabled:false, ..default()})
             // ------
 
             // Resources
@@ -32,7 +32,7 @@ pub struct PlayerPhysicsBundle {
 impl Default for PlayerPhysicsBundle {
     fn default() -> PlayerPhysicsBundle {
         PlayerPhysicsBundle {
-            collider: Collider::cuboid(14.0, 14.0),
+            collider: Collider::cuboid(7.0, 7.0),
             controller: KinematicCharacterController {
                 snap_to_ground: Some(CharacterLength::Relative(0.1)),
                 max_slope_climb_angle: 0.9, // ~47° in radians

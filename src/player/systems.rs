@@ -1,6 +1,5 @@
 use std::time::Duration;
 
-use bevy::input::keyboard::KeyboardInput;
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -17,16 +16,17 @@ pub fn add_controller_output(
 pub fn move_player(
     inputs: Res<Input<KeyCode>>,
     time: Res<Time>,
+    mut animator: ResMut<PlayerAnimation>,
     phys_consts: Res<PlayerPhysicsConstants>,
-    mut player_query: Query<(&Transform, &mut PlayerPhysicsValues, &mut CoyoteWatch, &mut JumpBuffer), With<PlayerMarker>>,
+    mut player_query: Query<(&Transform, &mut PlayerPhysicsValues, &mut CoyoteWatch, &JumpBuffer), With<PlayerMarker>>,
     mut player_controller_query: Query<&mut KinematicCharacterController>,
     player_controller_output_query: Query<&KinematicCharacterControllerOutput>,
 ) {
-    let Ok((_, mut player_phys_vals, mut coy_timer, mut jump_buffer)) = player_query.get_single_mut() else { return };
+    let Ok((_, mut player_phys_vals, mut coy_timer, jump_buffer)) = player_query.get_single_mut() else { return };
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
     // DEBUG
-    // println!("{}", coy_timer.timer.elapsed().as_secs_f32());
+    println!("{}", player_phys_vals.velocity);
     
     // X-COMPONENT:
 
@@ -107,8 +107,30 @@ pub fn move_player(
     let mut applied_velocity = player_phys_vals.velocity;
     if applied_velocity.y < 0.0 { applied_velocity.y *= phys_consts.falling_gravity_scaler };
 
-    // SET TRANSLATION
+
+    // FALLING SPEED 
+    applied_velocity.y = applied_velocity.y.clamp(-phys_consts.player_max_falling_speed, phys_consts.player_max_falling_speed);
     
+
+    // ADJUST ANIMATIONS BASED ON VELOCITY
+    if animator.change_animations {
+        if applied_velocity.y < -150.0 {
+            animator.animation = PlayerAnimationStates::Falling;
+        }
+        else if applied_velocity.y > 3.0 {
+            animator.animation = PlayerAnimationStates::Jumping;
+        }
+        else if applied_velocity.x.abs() > 65.0 {
+            animator.animation = PlayerAnimationStates::Running;
+        }
+        else {
+            animator.animation = PlayerAnimationStates::Idle;
+        }
+
+        animator.facing_left = applied_velocity.x < 0.0;
+    }
+
+    // SET TRANSLATION
     player_controller.translation = Some(applied_velocity  * time.delta_seconds());
     
 
@@ -124,11 +146,31 @@ pub fn tick_timers(
     for (mut coyote_timer, mut jump_buffer_timer) in player_query.iter_mut() {
         coyote_timer.timer.tick(time.delta());
         jump_buffer_timer.timer.tick(time.delta());
-        println!("{}", jump_buffer_timer.timer.elapsed_secs());
+        // println!("{}", jump_buffer_timer.timer.elapsed_secs());
         
         if inputs.just_pressed(KeyCode::Space) {
             jump_buffer_timer.timer.reset();
         }
     }
 
+}
+
+pub fn animate_player_sprite(
+    animation: Res<PlayerAnimation>,
+    time: Res<Time>,
+    mut atlas_handle_query: Query<&mut TextureAtlasSprite, With<PlayerMarker>>,
+) {
+    if let Ok(mut atlas_handle) = atlas_handle_query.get_single_mut() {
+        if animation.animate {
+            atlas_handle.index = match animation.animation  {
+                PlayerAnimationStates::Idle => 0,
+                PlayerAnimationStates::Running => (((time.elapsed_seconds() * animation.speed) %  2.0) + 2.0) as usize , // swich 2, 3
+                PlayerAnimationStates::Jumping => 4,
+                PlayerAnimationStates::Falling => 5,
+                _ => 0,
+            };
+
+            atlas_handle.flip_x = animation.facing_left;
+        }
+    }
 }
