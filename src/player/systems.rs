@@ -26,7 +26,7 @@ pub fn move_player(
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
     // DEBUG
-    println!("{}", player_phys_vals.velocity);
+    // println!("{}", player_phys_vals.velocity);
     
     // X-COMPONENT:
 

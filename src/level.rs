@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_ecs_tilemap::map::TilemapTileSize;
 use bevy_rapier2d::prelude::*;
 
 pub struct LevelPlugin;
@@ -36,20 +37,22 @@ pub fn build_wall_colliders (
     tiles: Query<(Entity, &TileEnumTags), Added<TileEnumTags>>,
 ) {
     for (entity, enum_tags) in tiles.iter() {
+        // half tile size for calculations:
+        let ts = 0.5 * Vec2::new(16.0, 16.0);
         if enum_tags.tags.contains(&String::from("Wall")) {
-            commands.entity(entity).insert(Collider::cuboid(8.0, 8.0));
+            commands.entity(entity).insert(Collider::cuboid(ts.x, ts.y));
         }
         else if enum_tags.tags.contains(&String::from("FullSlope")) {
-            commands.entity(entity).insert(Collider::triangle(Vec2::new(-8.0, -8.5), Vec2::new(8.0, -8.5), Vec2::new(8.0, 8.0)));
+            commands.entity(entity).insert(Collider::triangle(Vec2::new(-ts.x, -ts.y -0.5), Vec2::new(ts.x, -ts.y - 0.5), Vec2::new(ts.x, ts.y)));
         }
         else if enum_tags.tags.contains(&String::from("FullSlopeInv")) {
-            commands.entity(entity).insert(Collider::triangle(Vec2::new(-8.0, -8.5), Vec2::new(8.0, -8.5), Vec2::new(-8.0, 8.0)));
+            commands.entity(entity).insert(Collider::triangle(Vec2::new(-ts.x, -ts.y -0.5), Vec2::new(ts.x, -ts.y - 0.5), Vec2::new(-ts.x, ts.y)));
         }
         // else if enum_tags.tags.contains(&String::from("Circle")) {
         //     commands.entity(entity).insert(Collider::cuboid(8.0, 300.0));
         // }
         else if enum_tags.tags.contains(&String::from("Circle")) {
-            commands.entity(entity).insert(Collider::ball(8.0));
+            commands.entity(entity).insert(Collider::ball(ts.x));
         }
     }
 }   

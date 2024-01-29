@@ -49,9 +49,10 @@ fn main() {
 }
 
 fn setup(
-    mut commands: Commands,
+    mut _commands: Commands,
 ) {
-    commands.spawn(RigidBody::Fixed)
-        .insert(Collider::cuboid(20000f32, 20f32))
-        .insert(Name::new("test_collider"));
+    println!("\n\nKeybindings:\n- W,A,S,D :: Movement\n- R,T :: Switch demo level\n- TAB :: Debug mode\n- ESC :: Close window\n\nHave fun\n")
+    // commands.spawn(RigidBody::Fixed)
+    //     .insert(Collider::cuboid(20000f32, 20f32))
+    //     .insert(Name::new("test_collider"));
 }
