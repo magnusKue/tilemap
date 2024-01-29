@@ -1,6 +1,5 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use bevy_ecs_tilemap::map::TilemapTileSize;
 use bevy_rapier2d::prelude::*;
 
 pub struct LevelPlugin;
@@ -48,11 +47,19 @@ pub fn build_wall_colliders (
         else if enum_tags.tags.contains(&String::from("FullSlopeInv")) {
             commands.entity(entity).insert(Collider::triangle(Vec2::new(-ts.x, -ts.y -0.5), Vec2::new(ts.x, -ts.y - 0.5), Vec2::new(-ts.x, ts.y)));
         }
-        // else if enum_tags.tags.contains(&String::from("Circle")) {
-        //     commands.entity(entity).insert(Collider::cuboid(8.0, 300.0));
-        // }
         else if enum_tags.tags.contains(&String::from("Circle")) {
-            commands.entity(entity).insert(Collider::ball(ts.x));
+            commands.entity(entity).insert(Collider::cuboid(ts.x, ts.y));
+        }
+        // CIRCLES DONT GIVE NICE COLLISIONS. DONT USE THEM!!
+        // else if enum_tags.tags.contains(&String::from("Circle")) {
+        //     commands.entity(entity).insert(Collider::ball(ts.x));
+        // }
+        else if enum_tags.tags.contains(&String::from("Platform")) {
+            commands.entity(entity)
+                .with_children(|children| {
+                    children.spawn(Collider::cuboid(ts.x, ts.y*0.4))
+                        .insert(TransformBundle::from(Transform::from_xyz(0.0, 4.0, 0.0)));
+                });
         }
     }
 }   
