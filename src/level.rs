@@ -15,7 +15,7 @@ impl Plugin for LevelPlugin {
             ))
             
             // Resources
-            .insert_resource(LevelSelection::Identifier("World_Level_0".to_string()));
+            .insert_resource(LevelSelection::Identifier("World_Level_1".to_string()));
             // ------
     }
 }
@@ -47,13 +47,14 @@ pub fn build_wall_colliders (
         else if enum_tags.tags.contains(&String::from("FullSlopeInv")) {
             commands.entity(entity).insert(Collider::triangle(Vec2::new(-ts.x, -ts.y -0.5), Vec2::new(ts.x, -ts.y - 0.5), Vec2::new(-ts.x, ts.y)));
         }
-        else if enum_tags.tags.contains(&String::from("Circle")) {
-            commands.entity(entity).insert(Collider::cuboid(ts.x, ts.y));
-        }
         // CIRCLES DONT GIVE NICE COLLISIONS. DONT USE THEM!!
         // else if enum_tags.tags.contains(&String::from("Circle")) {
         //     commands.entity(entity).insert(Collider::ball(ts.x));
         // }
+        // USE CUBES INSTEAD
+        else if enum_tags.tags.contains(&String::from("Circle")) {
+            commands.entity(entity).insert(Collider::cuboid(ts.x-1.0, ts.y-1.0));
+        }
         else if enum_tags.tags.contains(&String::from("Platform")) {
             commands.entity(entity)
                 .with_children(|children| {
