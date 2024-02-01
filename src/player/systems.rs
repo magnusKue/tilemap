@@ -68,21 +68,27 @@ pub fn move_player(
 
     if let Ok(player_controller_output) = player_controller_output_query.get_single() {
         
-        if player_controller_output.grounded || coy_timer.timer.elapsed_secs() < phys_consts.coyote_time{
+        let coyote_active: bool =  coy_timer.timer.elapsed_secs() < phys_consts.coyote_time;
+        let grounded: bool = player_controller_output.grounded;
+        let input: bool = inputs.just_pressed(KeyCode::Space);
+        let input_buffer: bool = jump_buffer.timer.elapsed_secs() < phys_consts.jump_inp_buffering;
 
-            // println!("grounded");
-            if player_controller_output.grounded {
-                player_phys_vals.velocity.y = -0.2;
-            }
-
-            if inputs.just_pressed(KeyCode::Space) || jump_buffer.timer.elapsed_secs() < phys_consts.jump_inp_buffering { 
-                player_phys_vals.velocity.y = phys_consts.jump_boost;
-                coy_timer.timer.tick(Duration::from_secs_f32(200.0f32));
-            }
-        }
         
-        // RESET COYOTE TIMER WHEN leaving grounded state
-        if player_phys_vals.last_frame_grounded != player_controller_output.grounded && !player_controller_output.grounded {
+        if grounded {
+            // slightly push player down to keep detecting ground collision
+            player_phys_vals.velocity.y = -0.2;
+        }
+
+        if (grounded || coyote_active) && (input || input_buffer)  {
+            // JUMP
+            player_phys_vals.velocity.y = phys_consts.jump_boost;
+
+            coy_timer.timer.tick(Duration::from_secs_f32(200.0f32));
+        }
+
+
+        // RESET COYOTE TIMER WHEN LEAVING GROUNDED STATE
+        if player_phys_vals.last_frame_grounded != player_controller_output.grounded && !player_controller_output.grounded  && player_phys_vals.velocity.y < 30.{
             coy_timer.timer.reset();
         }
         

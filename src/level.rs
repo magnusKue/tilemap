@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::prelude::*;
 
 pub struct LevelPlugin;
@@ -15,9 +16,18 @@ impl Plugin for LevelPlugin {
             ))
             
             // Resources
-            .insert_resource(LevelSelection::Identifier("World_Level_1".to_string()));
+            .insert_resource(LevelSelection::Identifier("World_Level_1".to_string()))
+            .register_type::<SelectedLevel>()
+            .init_resource::<SelectedLevel>();
             // ------
     }
+}
+
+
+#[derive(Reflect, Resource, Default, InspectorOptions)]
+#[reflect(Resource, InspectorOptions)]
+pub struct SelectedLevel{
+    level: u32,
 }
 
 pub fn spawn_level(

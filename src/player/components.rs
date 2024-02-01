@@ -17,7 +17,10 @@ pub struct PlayerPhysicsValues {
 
 impl Default for PlayerPhysicsValues {
     fn default() -> PlayerPhysicsValues {
-        PlayerPhysicsValues { velocity: Vec2::ZERO, last_frame_grounded: false }
+        PlayerPhysicsValues { 
+            velocity: Vec2::ZERO, 
+            last_frame_grounded: false,
+        }
     }
 }
 
