@@ -140,7 +140,7 @@ pub fn camera_follow_player (
     let delta = player_transform.translation - camera_transform.translation;
 
     if delta.length() > 1.0 {
-       camera_transform.translation += marker.fp_move_speed * delta * time.delta_seconds() * 100.0;
+       camera_transform.translation += delta * marker.fp_move_speed * time.delta_seconds() * 100.0;
     }
     else {
         camera_transform.translation = player_transform.translation;

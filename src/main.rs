@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy_framepace::{FramepaceSettings, Limiter};
+use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 
@@ -21,6 +23,18 @@ pub mod level;
 
 pub mod parallax;
 
+#[derive(Reflect, Resource, InspectorOptions)]
+#[reflect(Resource, InspectorOptions)]
+pub struct DebugSettings {
+    pub limit_framerate: bool,
+    pub clamped_framerate: u32, 
+}
+
+impl Default for DebugSettings {
+    fn default() -> Self {
+        DebugSettings { limit_framerate: false, clamped_framerate: 60 }
+    }
+}
 
 fn main() {
     
@@ -42,6 +56,8 @@ fn main() {
             })
         )
         .add_plugins(LdtkPlugin)
+        .add_plugins(bevy_framepace::FramepacePlugin)
+
 
         .add_plugins(player::PlayerPlugin)
         .add_plugins(camera::CameraPlugin)
@@ -52,7 +68,10 @@ fn main() {
 
 
         // Systems
-        .add_systems(Update, bevy::window::close_on_esc)
+        .add_systems(Update, (
+            bevy::window::close_on_esc,
+            toggle_debug,
+        ))
         .add_systems(Startup, (
             setup,
         ))
@@ -63,6 +82,9 @@ fn main() {
         .register_ldtk_entity::<EnemyBundle>("MyEntityIdentifier")
         // ------
         
+        .init_resource::<DebugSettings>()
+        .register_type::<DebugSettings>()
+
         .run();
 }
 
@@ -75,4 +97,16 @@ fn setup(
         .insert(Collider::ball(1.))
         .insert(TransformBundle::default())
         .insert(Name::new("test_collider"));
+}
+
+fn toggle_debug(
+    settings: Res<DebugSettings>,
+    mut frame_pace: ResMut<FramepaceSettings>,
+) {
+    if settings.is_changed() {
+        match settings.limit_framerate {
+            true => frame_pace.limiter = Limiter::from_framerate(settings.clamped_framerate as f64),
+            false=> frame_pace.limiter = Limiter::Off,
+        }   
+    }
 }

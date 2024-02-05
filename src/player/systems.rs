@@ -26,12 +26,12 @@ pub fn move_player(
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
     // DEBUG
-    println!("{}", player_phys_vals.velocity);
+    // println!("{}", player_phys_vals.velocity);
     
     // X-COMPONENT:
 
     if player_phys_vals.velocity.x.abs() < 0.0001 { player_phys_vals.velocity.x = 0f32 }
-    player_phys_vals.velocity.x *= 1.0 - phys_consts.friction.x;
+    player_phys_vals.velocity.x *= 1.0 - phys_consts.friction.x * time.delta_seconds() * 170.;
 
     let mut direction: f32 = 0.0;
     
@@ -81,7 +81,7 @@ pub fn move_player(
 
         if (grounded || coyote_active) && (input || input_buffer)  {
             // println!("jumped");
-            player_phys_vals.velocity.y = phys_consts.jump_boost * time.delta_seconds();
+            player_phys_vals.velocity.y = phys_consts.jump_boost * 0.006;
 
             coy_timer.timer.tick(Duration::from_secs_f32(200.0f32));
         }
@@ -121,13 +121,13 @@ pub fn move_player(
 
     // ADJUST ANIMATIONS BASED ON VELOCITY
     if animator.change_animations {
-        if applied_velocity.y < -150.0 * time.delta_seconds() {
+        if applied_velocity.y < -150.0 * 0.006 {
             animator.animation = PlayerAnimationStates::Falling;
         }
-        else if applied_velocity.y > 3.0 * time.delta_seconds() {
+        else if applied_velocity.y > 3.0 * 0.006 {
             animator.animation = PlayerAnimationStates::Jumping;
         }
-        else if applied_velocity.x.abs() > 68. * time.delta_seconds() {
+        else if applied_velocity.x.abs() > 68. * 0.006 {
             animator.animation = PlayerAnimationStates::Running;
         }
         else {
