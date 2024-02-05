@@ -5,10 +5,12 @@ use crate::camera::CameraState;
 pub mod systems;
 pub mod components;
 pub mod ressources;
+pub mod spawnpoint;
 
 use systems::*;
 use components::*;
 use ressources::*;
+use spawnpoint::*;
 
 pub struct PlayerPlugin;
 
@@ -19,9 +21,10 @@ impl Plugin for PlayerPlugin {
             .add_systems(Update, (
                 move_player.run_if(in_state(CameraState::FollowPlayer)),
                 tick_timers,
-                animate_player_sprite
+                animate_player_sprite,
+                spawnpoint::respawn_player
             ))
-            .register_ldtk_entity::<PlayerBundle>("Player")
+            .register_ldtk_entity::<PlayerSpawnPoin>("PlayerSpawn")
             
             .init_resource::<PlayerPhysicsConstants>()
             .register_type::<PlayerPhysicsConstants>()

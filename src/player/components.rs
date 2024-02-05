@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
 use bevy::time::Stopwatch;
 
 use crate::physics::*;
@@ -49,15 +48,14 @@ impl Default for JumpBuffer {
     }
 }
 
-#[derive(Default, Bundle, LdtkEntity)]
+#[derive(Default, Bundle)]
 pub struct PlayerBundle {
-    marker: PlayerMarker,
+    pub marker: PlayerMarker,
 
-    #[sprite_sheet_bundle]
-    sprite_bundle: SpriteSheetBundle,
-    
-    physics: PlayerPhysicsBundle,
-    physics_values: PlayerPhysicsValues,
-    coyote_watch: CoyoteWatch,
-    jump_buffer: JumpBuffer,
+    pub sprite_bundle: SpriteSheetBundle,
+
+    pub physics: PlayerPhysicsBundle,
+    pub physics_values: PlayerPhysicsValues,
+    pub coyote_watch: CoyoteWatch,
+    pub jump_buffer: JumpBuffer,
 }

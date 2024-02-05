@@ -3,6 +3,8 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::prelude::*;
 
+use crate::player::components::PlayerMarker;
+
 pub struct LevelPlugin;
 
 impl Plugin for LevelPlugin {
@@ -77,12 +79,15 @@ pub fn build_wall_colliders (
 
 pub fn change_levels(
     inputs: Res<Input<KeyCode>>,
-    mut commands: Commands
+    mut commands: Commands,
+    mut player: Query<Entity, With<PlayerMarker>>,
 ) {
     if inputs.just_pressed(KeyCode::R) {
         commands.insert_resource(LevelSelection::Index(1));
+        commands.entity(player.get_single_mut().unwrap()).despawn();
     }
     else if inputs.just_pressed(KeyCode::T) {
         commands.insert_resource(LevelSelection::Index(0));
+        commands.entity(player.get_single_mut().unwrap()).despawn();
     }
 }

@@ -96,7 +96,7 @@ fn setup(
     commands.spawn(RigidBody::Fixed)
         .insert(Collider::ball(1.))
         .insert(TransformBundle::default())
-        .insert(Name::new("test_collider"));
+        .insert(Name::new("Origin gizmo"));
 }
 
 fn toggle_debug(

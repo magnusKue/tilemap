@@ -180,3 +180,4 @@ pub fn animate_player_sprite(
         }
     }
 }
+
