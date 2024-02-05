@@ -26,7 +26,7 @@ pub fn move_player(
     let Ok(mut player_controller) = player_controller_query.get_single_mut() else { return };
     
     // DEBUG
-    // println!("{}", player_phys_vals.velocity);
+    println!("{}", player_phys_vals.velocity);
     
     // X-COMPONENT:
 
@@ -53,7 +53,7 @@ pub fn move_player(
         }    
     }
 
-    player_phys_vals.velocity.x += direction * phys_consts.acceleration * phys_consts.player_speed* 100f32;
+    player_phys_vals.velocity.x += direction * phys_consts.acceleration * phys_consts.player_speed * 70. * time.delta_seconds();
 
 
 
@@ -64,7 +64,7 @@ pub fn move_player(
 
     // if player_physics_values.velocity.y.abs() < 0.001 { player_physics_values.velocity.y = 0f32 }
 
-    player_phys_vals.velocity.y -= phys_consts.gravity;
+    player_phys_vals.velocity.y -= phys_consts.gravity * time.delta_seconds() * 1.3;
 
     if let Ok(player_controller_output) = player_controller_output_query.get_single() {
         
@@ -80,8 +80,8 @@ pub fn move_player(
         }
 
         if (grounded || coyote_active) && (input || input_buffer)  {
-            // JUMP
-            player_phys_vals.velocity.y = phys_consts.jump_boost;
+            // println!("jumped");
+            player_phys_vals.velocity.y = phys_consts.jump_boost * time.delta_seconds();
 
             coy_timer.timer.tick(Duration::from_secs_f32(200.0f32));
         }
@@ -118,15 +118,16 @@ pub fn move_player(
     applied_velocity.y = applied_velocity.y.clamp(-phys_consts.player_max_falling_speed, phys_consts.player_max_falling_speed);
     
 
+
     // ADJUST ANIMATIONS BASED ON VELOCITY
     if animator.change_animations {
-        if applied_velocity.y < -150.0 {
+        if applied_velocity.y < -150.0 * time.delta_seconds() {
             animator.animation = PlayerAnimationStates::Falling;
         }
-        else if applied_velocity.y > 3.0 {
+        else if applied_velocity.y > 3.0 * time.delta_seconds() {
             animator.animation = PlayerAnimationStates::Jumping;
         }
-        else if applied_velocity.x.abs() > 65.0 {
+        else if applied_velocity.x.abs() > 68. * time.delta_seconds() {
             animator.animation = PlayerAnimationStates::Running;
         }
         else {
@@ -137,7 +138,7 @@ pub fn move_player(
     }
 
     // SET TRANSLATION
-    player_controller.translation = Some(applied_velocity  * time.delta_seconds());
+    player_controller.translation = Some(applied_velocity * time.delta_seconds() * 170.);
     
 
     // (OPTIONAL) Handle Jumping
@@ -158,7 +159,6 @@ pub fn tick_timers(
             jump_buffer_timer.timer.reset();
         }
     }
-
 }
 
 pub fn animate_player_sprite(
