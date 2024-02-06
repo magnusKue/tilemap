@@ -69,7 +69,7 @@ impl From<&EntityInstance> for ObjectPhysicsBundle {
         let rotation_constraints = LockedAxes::ROTATION_LOCKED;
 
         match entity_instance.identifier.as_ref() {
-            "MyEntityIdentifier" => ObjectPhysicsBundle {
+            "Enemy" => ObjectPhysicsBundle {
                 collider: Collider::cuboid(5., 5.),
                 rigid_body: RigidBody::Dynamic,
                 rotation_constraints,

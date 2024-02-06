@@ -79,7 +79,8 @@ fn main() {
 
 
         // LDtk entitys
-        .register_ldtk_entity::<EnemyBundle>("MyEntityIdentifier")
+        .register_ldtk_entity::<EnemyBundle>("Enemy")
+        .register_ldtk_entity::<CheeseBundle>("Cheese")
         // ------
         
         .init_resource::<DebugSettings>()
@@ -92,7 +93,7 @@ fn setup(
     mut commands: Commands,
     _asset_server: Res<AssetServer>,
 ) {
-    println!("\n\nKeybindings:\n- W,A,S,D :: Movement\n- R,T :: Switch demo level\n- TAB :: Debug mode\n- ESC :: Close window\n\nHave fun\n");
+    println!("\n\nKeybindings:\n- W,A,S,D :: Movement\n- TAB :: Debug mode\n- ESC :: Close window\n\nHave fun\n");
     commands.spawn(RigidBody::Fixed)
         .insert(Collider::ball(1.))
         .insert(TransformBundle::default())

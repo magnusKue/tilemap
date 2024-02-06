@@ -3,7 +3,7 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_inspector_egui::{inspector_options::ReflectInspectorOptions, InspectorOptions};
 use bevy_rapier2d::prelude::*;
 
-use crate::player::components::PlayerMarker;
+use crate::{player::components::PlayerMarker, Cheese};
 
 pub struct LevelPlugin;
 
@@ -13,12 +13,13 @@ impl Plugin for LevelPlugin {
             // SYSTEMS
             .add_systems(Startup, spawn_level)
             .add_systems(Update, (
-                change_levels,
-                build_wall_colliders
+                change_levels.after(reach_level_end),
+                build_wall_colliders,
+                reach_level_end
             ))
             
             // Resources
-            .insert_resource(LevelSelection::Identifier("World_Level_1".to_string()))
+            .insert_resource(LevelSelection::Index(0))
             .register_type::<SelectedLevel>()
             .init_resource::<SelectedLevel>();
             // ------
@@ -29,7 +30,7 @@ impl Plugin for LevelPlugin {
 #[derive(Reflect, Resource, Default, InspectorOptions)]
 #[reflect(Resource, InspectorOptions)]
 pub struct SelectedLevel{
-    level: u32,
+    level: usize,
 }
 
 pub fn spawn_level(
@@ -78,16 +79,32 @@ pub fn build_wall_colliders (
 }   
 
 pub fn change_levels(
-    inputs: Res<Input<KeyCode>>,
+    selected_lvl: Res<SelectedLevel>,
     mut commands: Commands,
-    mut player: Query<Entity, With<PlayerMarker>>,
+    player_query: Query<Entity, With<PlayerMarker>>,
 ) {
-    if inputs.just_pressed(KeyCode::R) {
-        commands.insert_resource(LevelSelection::Index(1));
-        commands.entity(player.get_single_mut().unwrap()).despawn();
+    let Ok(player) = player_query.get_single() else {return; };
+
+    if selected_lvl.is_changed() {
+        commands.insert_resource(LevelSelection::Index(selected_lvl.level));
+        commands.entity(player).despawn();
     }
-    else if inputs.just_pressed(KeyCode::T) {
-        commands.insert_resource(LevelSelection::Index(0));
-        commands.entity(player.get_single_mut().unwrap()).despawn();
+}
+
+pub fn reach_level_end (
+    mut commands: Commands,
+    mut selected_level: ResMut<SelectedLevel>,
+    collider_handle_query: Query<&Transform, With<Cheese>>,
+    player_query: Query<(&Transform, Entity), With<PlayerMarker>>,
+
+) {
+    let Ok((player_transform, player)) = player_query.get_single() else {return; };
+    for cheese_transform in collider_handle_query.iter() {
+        if cheese_transform.translation.distance(player_transform.translation) < 10.0 {
+            // next level
+            println!("end of level {} reached", selected_level.level);
+            selected_level.level += 1;
+            commands.entity(player).despawn();
+        }
     }
 }
