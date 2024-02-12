@@ -23,6 +23,8 @@ pub mod level;
 
 pub mod parallax;
 
+pub mod enemy;
+
 #[derive(Reflect, Resource, InspectorOptions)]
 #[reflect(Resource, InspectorOptions)]
 pub struct DebugSettings {
@@ -64,6 +66,7 @@ fn main() {
         .add_plugins(physics::PhysicsPlugin)
         .add_plugins(parallax::ParallaxPlugin)
         .add_plugins(level::LevelPlugin)
+        .add_plugins(enemy::EnemyPlugin)
         // ------
 
 
@@ -79,7 +82,6 @@ fn main() {
 
 
         // LDtk entitys
-        .register_ldtk_entity::<EnemyBundle>("Enemy")
         .register_ldtk_entity::<CheeseBundle>("Cheese")
         // ------
         

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use bevy_rapier2d::prelude::*;
+// use bevy_rapier2d::prelude::*;
 
 use crate::physics::ObjectPhysicsBundle;
 
@@ -8,6 +8,12 @@ use crate::physics::ObjectPhysicsBundle;
 
 #[derive(Component, Default)]
 pub struct Cheese;
+
+#[derive(Component, Default)]
+pub struct Enemy;
+
+#[derive(Component, Default)]
+pub struct DamageTrigger;
 
 // --- BUNDLES
 
@@ -22,6 +28,9 @@ pub struct EnemyBundle {
 
     #[from_entity_instance]
     entity_instance: EntityInstance,
+
+    enemy_marker: Enemy,
+    // sensor: Sensor,
 }
 
 
