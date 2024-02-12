@@ -106,7 +106,6 @@ pub fn reach_level_end (
     mut selected_level: ResMut<SelectedLevel>,
     collider_handle_query: Query<&Transform, With<Cheese>>,
     player_query: Query<&Transform, With<PlayerMarker>>,
-
 ) {
     let Ok(player_transform) = player_query.get_single() else { return; };
     
