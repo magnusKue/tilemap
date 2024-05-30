@@ -12,6 +12,7 @@ use components::*;
 use ressources::*;
 use spawnpoint::*;
 
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
