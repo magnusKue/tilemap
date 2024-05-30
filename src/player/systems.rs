@@ -114,8 +114,8 @@ pub fn move_player(
     if applied_velocity.y < 0.0 { applied_velocity.y *= phys_consts.falling_gravity_scaler };
 
 
-    // FALLING SPEED 
-    applied_velocity.y = applied_velocity.y.clamp(-phys_consts.player_max_falling_speed, phys_consts.player_max_falling_speed);
+    // FALLING SPEED
+    applied_velocity.y = applied_velocity.y.clamp(-phys_consts.player_max_falling_speed, 999.9);
     
 
 

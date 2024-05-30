@@ -28,10 +28,10 @@ impl Default for PlayerPhysicsConstants {
         PlayerPhysicsConstants {
             player_speed: 0.1f32,
             player_max_speed: 4f32,
-            player_max_falling_speed: 380f32,
-            falling_gravity_scaler: 1.5,
+            player_max_falling_speed: 1.4f32,
+            falling_gravity_scaler: 1.1,
             coyote_time: 0.1,
-            jump_boost: 320f32,
+            jump_boost: 270f32,
             friction: Vec2::new(0.1f32, 0f32),
             acceleration: 1.2f32,
             gravity: 4f32,
